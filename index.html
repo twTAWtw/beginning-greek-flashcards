@@ -330,7 +330,7 @@
     </div>
     <div class="order-toggle">
       <button class="order-btn active" id="btnOrdered">In Order</button>
-      <button class="order-btn" id="btnShuffled">Shuffled</button>
+      <button class="order-btn" id="btnShuffled">&#x21BB; Shuffled</button>
     </div>
   </div>
 </div>
@@ -873,7 +873,7 @@ function render() {
     // Front = English (cognate on English/front), Back = Greek
     frontHint.textContent = 'ENGLISH';
     frontMain.textContent = w.english;
-    frontSub.textContent  = cognoteText;
+    frontSub.textContent  = '';
     backHint.textContent  = 'GREEK';
     backMain.textContent  = w.greek;
     backSub.textContent   = '';
@@ -896,8 +896,14 @@ function flipCard() {
 function navigate(dir) {
   const next = idx + dir;
   if (next < 0 || next >= deck.length) return;
-  idx = next;
-  render();
+  if (flipped) {
+    card.classList.remove('flipped');
+    flipped = false;
+    setTimeout(() => { idx = next; render(); }, 450);
+  } else {
+    idx = next;
+    render();
+  }
 }
 
 // Keyboard
