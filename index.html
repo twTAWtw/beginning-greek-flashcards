@@ -928,14 +928,12 @@ document.getElementById('btnOrdered').addEventListener('click', () => {
   }
 });
 document.getElementById('btnShuffled').addEventListener('click', () => {
-  if (!shuffled) {
-    shuffled = true;
-    document.getElementById('btnShuffled').classList.add('active');
-    document.getElementById('btnOrdered').classList.remove('active');
-    deck = shuffle([...orderedDeck]);
-    idx = 0;
-    render();
-  }
+  shuffled = true;
+  document.getElementById('btnShuffled').classList.add('active');
+  document.getElementById('btnOrdered').classList.remove('active');
+  deck = shuffle([...orderedDeck]);
+  idx = 0;
+  render();
 });
 
 // Init
