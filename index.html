@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Greek Flashcards</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: #c9a96e;
+    margin-bottom: 24px;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    max-width: 560px;
+    margin-bottom: 28px;
+  }
+
+  .control-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #888;
+    white-space: nowrap;
+  }
+
+  /* Chapter checkboxes */
+  .chapter-panel {
+    width: 100%;
+    background: #16213e;
+    border: 1px solid #2a3a5c;
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+
+  .chapter-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .chapter-panel-header label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #888;
+  }
+
+  .btn-all {
+    background: none;
+    border: 1px solid #2a3a5c;
+    border-radius: 6px;
+    color: #c9a96e;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .btn-all:hover { background: #1e2d4a; }
+
+  .chapter-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .ch-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #1a1a2e;
+    border: 1px solid #2a3a5c;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.82rem;
+    color: #aaa;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .ch-label:hover { border-color: #c9a96e; color: #e0e0e0; }
+
+  .ch-label input { display: none; }
+
+  .ch-label.checked {
+    border-color: #c9a96e;
+    background: #1e2a3e;
+    color: #c9a96e;
+    font-weight: 600;
+  }
+
+  .mode-toggle {
+    display: flex;
+    background: #16213e;
+    border: 1px solid #2a3a5c;
+    border-radius: 8px;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  .mode-btn {
+    flex: 1;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .mode-btn.active {
+    background: #c9a96e;
+    color: #1a1a2e;
+    font-weight: 600;
+  }
+
+  .order-toggle {
+    display: flex;
+    background: #16213e;
+    border: 1px solid #2a3a5c;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .order-btn {
+    padding: 8px 14px;
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .order-btn.active {
+    background: #c9a96e;
+    color: #1a1a2e;
+    font-weight: 600;
+  }
+
+  /* Card */
+  .card-area {
+    width: 100%;
+    max-width: 560px;
+    perspective: 1200px;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    width: 100%;
+    min-height: 240px;
+    position: relative;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    min-height: 240px;
+    background: #16213e;
+    border: 1px solid #2a3a5c;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 28px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .card-face.back { transform: rotateY(180deg); }
+
+  .card-hint {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #555;
+    margin-bottom: 20px;
+    user-select: none;
+  }
+
+  .card-main {
+    font-size: 2.2rem;
+    font-weight: 500;
+    color: #f0e6d0;
+    text-align: center;
+    line-height: 1.3;
+    margin-bottom: 10px;
+  }
+
+  .card-face.back .card-main {
+    font-size: 1.6rem;
+    color: #c9a96e;
+  }
+
+  .card-sub {
+    font-size: 0.82rem;
+    color: #556;
+    text-align: center;
+    font-style: italic;
+    margin-top: 6px;
+  }
+
+  .card-face.front .card-sub {
+    color: #667;
+  }
+
+  .flip-hint {
+    font-size: 0.72rem;
+    color: #444;
+    margin-top: 18px;
+    user-select: none;
+  }
+
+  /* Navigation */
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .nav-btn {
+    background: #16213e;
+    border: 1px solid #2a3a5c;
+    border-radius: 10px;
+    color: #c9a96e;
+    width: 44px;
+    height: 44px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-btn:hover:not(:disabled) { background: #1e2d4a; }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .progress {
+    font-size: 0.85rem;
+    color: #666;
+    min-width: 80px;
+    text-align: center;
+  }
+
+  .progress-bar-wrap {
+    width: 100%;
+    max-width: 560px;
+    height: 4px;
+    background: #16213e;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: #c9a96e;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  /* Empty state */
+  .empty {
+    color: #555;
+    font-size: 0.9rem;
+    margin-top: 40px;
+  }
+
+  /* Card wrapper needs a fixed height for absolute children */
+  .card-area .card { height: 240px; }
+  .card-face { height: 240px; min-height: unset; }
+</style>
+</head>
+<body>
+
+<h1>&#x1F4D6; Greek Flashcards</h1>
+
+<div class="controls">
+  <div class="chapter-panel">
+    <div class="chapter-panel-header">
+      <label>Chapters</label>
+      <button class="btn-all" id="btnAll">All</button>
+      <button class="btn-all" id="btnNone">None</button>
+    </div>
+    <div class="chapter-grid" id="chapterGrid"></div>
+  </div>
+  <div class="control-row">
+    <label>Mode</label>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="btnGE">Greek → English</button>
+      <button class="mode-btn" id="btnEG">English → Greek</button>
+    </div>
+    <div class="order-toggle">
+      <button class="order-btn active" id="btnOrdered">In Order</button>
+      <button class="order-btn" id="btnShuffled">Shuffled</button>
+    </div>
+  </div>
+</div>
+
+<div class="card-area" id="cardArea">
+  <div class="card" id="card" onclick="flipCard()">
+    <div class="card-face front">
+      <div class="card-hint" id="frontHint">GREEK</div>
+      <div class="card-main" id="frontMain">—</div>
+      <div class="card-sub" id="frontSub"></div>
+      <div class="flip-hint">click to reveal</div>
+    </div>
+    <div class="card-face back">
+      <div class="card-hint" id="backHint">ENGLISH</div>
+      <div class="card-main" id="backMain">—</div>
+      <div class="card-sub" id="backSub"></div>
+    </div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">&#8592;</button>
+  <div class="progress" id="progress">0 / 0</div>
+  <button class="nav-btn" id="btnNext" onclick="navigate(1)">&#8594;</button>
+</div>
+
+<div class="progress-bar-wrap">
+  <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<script>
+const RAW = `## Chapter 1
+ἀγάπη, ἡ        love
+γῆ, ἡ            earth, land, ground (geology)
+ζωή, ἡ            life (zoo, zoology)
+φωνή, ἡ        voice, sound (phonetics, phonograph, phone)
+ἀλήθεια, ἡ        truth
+ἁμαρτία, ἡ        sin (hamartiology—the theological study of sin)
+βασιλεία, ἡ        kingdom, reign (basilica)
+δόξα, ἡ            glory, majesty (doxology)
+ἐκκλησία, ἡ        congregation, assembly, church (ecclesiastical)
+ἡμέρα, ἡ        day (ephemeral, "for a day")
+καρδία, ἡ        heart (cardiologist)
+δέ            and, but, now
+καί             and, even, also
+μέν            on the one hand, indeed
+ὁ, ἡ, τό            the
+## Chapter 2
+ἀδελφός, ὁ        brother (and sister) (Philadelphia, the city of brotherly love)
+ἄνθρωπος, ὁ        man, human being, husband (anthropology, anthropomorphic)
+θεός, ὁ         God (theology)
+κόσμος, ὁ         world, universe; adornment (cosmos, cosmology, cosmetics)
+κύριος, ὁ         Lord, master, sir
+λόγος, ὁ         word, message, account (logic, theology, psychology)
+νόμος, ὁ         law, principle (theonomists)
+οὐρανός, ὁ         heaven, sky (Uranus)
+υἱός, ὁ            son, descendant
+Χριστός, ὁ         Christ, Messiah, Anointed One (Christ)
+ἔργον, τό        work, deed (ergonomic)
+εὐαγγέλιον, τό        good news, gospel (evangelistic, evangelical)
+ἱερόν, τό        temple, sanctuary
+σημεῖον, τό        sign (semiotics)
+τέκνον, τό        child, son, descendant
+## Chapter 3
+εἰμί             I am, exist
+ἀκούω            I hear, listen to, obey (acoustics)
+γινώσκω         I know, understand, acknowledge (knowledge, Gnostics)
+γράφω           I write (graphics)
+ἔχω               I have, hold
+λέγω             I say, speak (legend)
+λαμβάνω       I take, receive
+λύω               I loose, destroy
+πιστεύω         I believe, have faith/trust in
+ἀποκρίνομαι   I answer, reply
+γίνομαι          I become, come, exist, am born
+ἔρχομαι        I come, go
+πορεύομαι     I go, travel
+ἀλλά             but, yet, nevertheless
+ὅτι                that, because
+## Chapter 4
+ἄγω                I lead, bring (pedagogical)
+βλέπω            I see, look at
+διδάσκω          I teach (didactic)
+ἐγείρω            I raise up
+κρίνω             I judge, condemn (critic)
+μένω              I remain, abide, dwell (remain)
+ὑπάγω            I go away, depart
+δοῦλος, ὁ        slave (doula)
+θάνατος, ὁ      death ("Thanatopsis," poem by William Cullen Bryant)
+ψυχή, ἡ         soul, life, living being (psychology)
+ὥρα, ἡ           hour (hour)
+εἰ                  if, whether
+εἴτε               if, whether
+καθώς           as, just as, even as
+ὡς                as, like
+## Chapter 5
+βαπτίζω          I baptize, immerse, dip (baptize)
+θεραπεύω        I heal (therapeutic)
+κράζω             I cry out
+ἄγγελος, ὁ       angel, messenger (angel)
+μαθητής, ὁ      disciple, follower (mathematics)
+ὄχλος, ὁ          crowd
+προφήτης, ὁ    prophet (prophet)
+γάρ                for, because
+ἐκεῖ                there, in that place
+κἀγώ             and I (καί + ἐγώ)
+οὖν                then, so, therefore
+οὕτως            in this manner, thus, so
+τέ                 and, but
+οὐ, οὐκ, οὐχ   no, not
+οὐχί              no! (emphatic)
+## Chapter 6
+ἀγαπάω           I love
+γεννάω            I give birth to, bear, beget (genealogy)
+ἐπερωτάω         I ask
+ἐρωτάω            I ask, question, request
+αἰτέω               I ask, demand
+ἀκολουθέω        I follow (acolyte)
+ζητέω               I seek, look for
+καλέω              I call, invite, name (call)
+λαλέω              I speak, say (glossolalia)
+μαρτυρέω         I testify, bear witness (martyr)
+παρακαλέω       I call, urge, comfort
+περιπατέω        I walk, live (peripatetic)
+ποιέω               I do, make (poet)
+φοβέομαι         I am afraid, fear, respect (phobia)
+πληρόω            I fill, fulfill, complete
+## Chapter 7
+ἀπό            from, away from (gen.)
+διά             through (gen.); because of (acc.) (diameter)
+εἰς              into, among, for (acc.) (eisegesis)
+ἐκ              from, out of (gen.) (exhale, exegesis)
+ἐν              in, on, at, by, with (dat.)
+ἐπί            on, upon, over (gen.); on, upon, at, in (dat.); on, upon, to, for (acc.) (epigraph)
+κατά            down, against (gen.); according to (acc.) (cataphoric)
+μετά            with, among (gen.); after (acc.)
+παρά            from (gen.); with (dat.); beside, on, at (acc.) (parable, paramedic)
+περί             about, concerning (gen.); around (acc.) (perimeter)
+πρός            to, toward (acc.) (prosthesis)
+σύν             with (dat.) (syntax)
+ὑπέρ            for, on behalf of (gen.); above, beyond (acc.) (hypercritical, hyperactive)
+ὑπό              by (gen.); under, below (acc.) (hypotaxis, hypothesis)
+ἐνώπιον        before, in the presence of
+## Chapter 8
+αὐτός, –ή, –ό        he, she, it; self, same (autopilot)
+ἐγώ, ἡμεῖς            I; we (ego, egomaniac)
+ὅς, ἥ, ὅ                who, which, that
+σύ, ὑμεῖς             you (sg.); you (pl.)
+ἄρτος, ὁ               bread, food
+δικαιοσύνη, ἡ       righteousness, justice
+εἰρήνη, ἡ             peace (irenic, Irene)
+ἐξουσία, ἡ           authority, right, power
+θάλασσα, ἡ         lake, sea (thalassic)
+λαός, ὁ               people, crowd (laity)
+ὁδός, ἡ               way, road (exodus)
+οἰκία, ἡ              home, dwelling, family (economy)
+οἶκος, ὁ              house, household, family
+ὀφθαλμός, ὁ       eye (ophthalmology)
+τόπος, ὁ             place (topography)
+## Chapter 9
+διώκω                I pursue, persecute
+δοξάζω               I glorify, praise (doxology)
+πέμπω               I send
+πράσσω             I do, practice (practical, pragmatic)
+σῴζω                I save, rescue, heal (soteriology)
+τηρέω               I keep, guard, obey
+ἀπόστολος, ὁ     apostle, messenger (apostle)
+ἐντολή, ἡ          command
+καιρός, ὁ           time, season
+κεφαλή, ἡ         head (encephalitis)
+πρόσωπον, τό    face, appearance
+σάββατον, τό    Sabbath, week (Sabbath)
+ἔτι                    still, yet, more
+μᾶλλον             more, rather
+οὐκέτι               no longer
+## Chapter 10
+ἀνοίγω            I open
+ἀπολύω           I set free, dismiss, divorce
+ἄρχω               I rule, begin (mid) (oligarch)
+προσεύχομαι    I pray
+προσκυνέω       I worship
+συνάγω            I gather, bring together (synagogue)
+ἀρχή, ἡ            beginning (archaic)
+δαιμόνιον, τό    demon (demon)
+διδάσκαλος, ὁ   teacher (didactic)
+θρόνος, ὁ          throne (throne)
+ἱμάτιον, τό       clothing, garment
+καρπός, ὁ         fruit, crop
+πλοῖον, τό        ship, boat
+συναγωγή, ἡ    synagogue, assembly (synagogue)
+χαρά, ἡ            joy (charity)
+## Chapter 11
+ἀναβαίνω           I go up, ascend (Anabasis)
+ἀπέρχομαι          I go away, depart
+ἀποθνῄσκω         I die (euthanasia, "Thanatopsis")
+βάλλω                I throw, cast out (ball, ballistic)
+εἰσέρχομαι           I go in, enter
+ἐκβάλλω             I drive/send out
+ἐσθίω                  I eat
+ἐξέρχομαι            I go out, depart, leave
+εὑρίσκω              I find, discover (heuristic, Eureka!)
+καταβαίνω          I go down, descend
+πίνω                   I drink
+πίπτω                 I fall
+προσέρχομαι        I go to, approach
+φέρω                  I bear, carry (metaphor)
+ἐπαγγελία, ἡ       promise
+## Chapter 12
+αἴρω                  I take up/away
+ἀπαγγέλλω        I announce, report (angel)
+ἀποκτείνω          I kill, put to death
+ἀποστέλλω         I send out (apostle)
+σπείρω               I sow, plant (sperm, spore)
+γλῶσσα, ἡ          language, tongue (glossolalia)
+γραφή, ἡ           writing, Scripture (graphics)
+λίθος, ὁ              stone (lithograph)
+ναός, ὁ               temple, sanctuary
+παραβολή, ἡ      parable (parable)
+σοφία, ἡ            wisdom (sophistry, sophomore)
+σωτηρία, ἡ         salvation, deliverance
+χρόνος, ὁ            time (chronograph, chronology)
+διό                     therefore, for this reason
+εὐθύς                 immediately, straightaway
+## Chapter 13
+αἰών, αἰῶνος, ὁ              eternity, age, world (eon)
+ἀνήρ, ἀνδρός, ὁ              man, husband (androgynous, android)
+ἀρχιερεύς, ἀρχιερέως, ὁ    high priest (archenemy, arch)
+βασιλεύς, βασιλέως, ὁ     king (basilica)
+πατήρ, πατρός, ὁ            father, ancestor (patristics, patriarch)
+γυνή, γυναικός, ἡ          woman, wife (gynecology)
+μήτηρ, μητρός, ἡ          mother (matriarch)
+πίστις, πίστεως, ἡ        faith, trust
+πόλις, πολέως, ἡ          city, town (metropolitan)
+σάρξ, σαρκός, ἡ           flesh, body, mortal nature (sarcoma, sarcophagus)
+χάρις, χάριτος, ἡ         grace, thanks (charity, Charis— a woman's name)
+ἔθνος, ἔθνους, τό          nation, people; Gentiles (pl.) (ethnic)
+ὄνομα, ὀνόματος, τό     name (pseudonym)
+πνεῦμα, πνεύματος, τό   Spirit, spirit, wind (pneumatology)
+σῶμα, σώματος, τό     body (psychosomatic)
+## Chapter 14
+ἐγγίζω            I approach, draw near
+ζάω                I live (zoo)
+οἶδα                I know, understand
+ὁράω              I see, perceive (panorama)
+πείθω             I persuade, convince (faith)
+αἷμα, αἵματος, τό      blood (hematology, hemoglobin)
+γραμματεύς, γραμματέως, ὁ         scribe (grammar)
+δύναμις, δυνάμεως, ἡ        power, miracle (dynamic)
+πούς, ποδός, ὁ                  foot (podiatrist)
+πῦρ, πυρός, τό                 fire (pyre, pyromaniac)
+ῥῆμα, ῥήματος, τό           word, saying (Rhema Bible Training College)
+στόμα, στόματος, τό       mouth (stomach)
+ὕδωρ, ὕδατος, τό            water (hydraulics, hydrogen)
+φῶς, φωτός, τό              light (photon, photograph)
+χείρ, χειρός, ἡ                hand
+## Chapter 15
+ἀγαθός, –ή, –όν            good (Agatha)
+ἅγιος, –α, –ον              holy; saints (pl. subst.) (hagiography)
+ἄλλος, –η, –ο              other, another, different (allomorph)
+δίκαιος, –α, –ον           righteous, just
+ἕτερος, –α, –ον            other, another, different (heterosexual)
+καλός, –ή, –όν            good, beautiful (calligraphy)
+μέγας, μεγάλη, μέγα  large, great (mega-market, megalomaniac)
+νεκρός, –ά, –όν          dead (necromancy, necropolis)
+πᾶς, πᾶσα, πᾶν          every, all (pantheism, pan-Hellenic, pan-American)
+πιστός, –ή, –όν          faithful, believing
+πολύς, πολλή, πολύ   much, many, large, great (polygon)
+πονηρός, –ά, –όν        evil, wicked
+νῦν                           now, at present
+πάλιν                       again
+ἤ                             or, than
+## Chapter 16
+εὐαγγελίζω                I announce good news, preach (evangelist)
+θεωρέω                      I gaze, behold, look at
+κάθημαι                    I sit (cathedral—where the "seat" of the bishop is)
+κηρύσσω                   I herald, proclaim, preach (kerygma)
+ὑπάρχω                    I exist, am
+αἰώνιος, –α, -ον         eternal (aeon)
+ἕκαστος, –η, –ον        each
+οὐδείς, οὐδεμία, οὐδέν     no one, nothing (subst.)
+πρεσβύτερος, –α, –ον    elder, older (Presbyterian)
+ἀμήν                        amen, truly, so be it (Amen)
+ἔξω                          outside (exoskeleton)
+ἕως                          until, while
+οὐδέ                         and not, neither, nor
+οὔτε                         and not, neither, nor
+τότε                         then
+## Chapter 17
+φανερόω                I reveal, make known, manifest (phantom, epiphany)
+κρατέω                  I grasp, seize, arrest (democracy)
+εἷς, μία, ἕν            one (hendiadys)
+δύο                       two (duet)
+τρεῖς                     three (triad)
+τέσσαρες               four (tesseract)
+πέντε                    five (Pentagon)
+ἑπτά                     seven (heptagon)
+δέκα                     ten (decimeter)
+δώδεκα                 twelve (dodecagon)
+πρῶτος, –η, –ον     first (prototype)
+δεύτερος, –α, –ον   second (Deuteronomy)
+τρίτος, –η, –ον       third (tricycle)
+τέταρτος, –η, –ον    fourth (tetrarch)
+μή                         no, not (employed with non-indicative verbs)
+## Chapter 18
+προσφέρω              I bring to, offer
+ἑτοιμάζω               I prepare
+δέω                       I bind
+παιδίον, τό            child (pedagogy)
+ὄρος, ὄρους, τό       mountain, hill (orology)
+ἐλπίς, ἐλπίδος, ἡ    hope
+μόνος, –η, –ον       only, single, alone (monocle, monograph)
+ὅλος, –η, –ον        whole, entire, complete (wholistic)
+ἀγαπητός, –ή, –όν     beloved
+μέσος, –η, –ον          middle, midst (Mesopotamia)
+λοιπός, –ή, –όν         remaining, rest
+δεξιός, –ά, –όν          right (ambidextrous)
+ἄρα                     so then
+ἤδη                     already, now
+ὧδε                     here
+## Chapter 19
+ἀλλήλων                 of one another (alien)
+ἑαυτοῦ, –ῆς, –οῦ     (of) himself, herself, itself
+ἐκεῖνος, –η, –ο         that; those (pl.)
+ἐμαυτοῦ, –ῆς           myself
+οὗτος, αὕτη, τοῦτο   this; these (pl.)
+σεαυτοῦ, –ῆς           (of) yourself
+τις, τι                     someone, certain
+τίς, τί                     who? which? what?
+ἐμός, –ή, –όν           my, mine
+ἔσχατος, –η, –ον      last (eschatology)
+ἴδιος, –α, –ον           one's own, peculiar (idiot)
+κακός, –ή, –όν        bad, evil (cacophony)
+ὅσος, –η, –ον          as much as
+τοιοῦτος, –αύτη, οῦτον    of such a kind, such as this
+πῶς                       how?
+## Chapter 20
+ἁμαρτάνω           I sin (hamartology)
+βούλομαι           I wish, want, desire (volition)
+δεῖ                    It is necessary, one must/should
+δοκέω               I seem, suppose, think (Docetism)
+δύναμαι            I am able, can (dynamic)
+θέλω                I want, wish, desire (Monothelitism)
+μέλλω            I am about to, am going to
+θέλημα, θελήματος, τό    will, wish, desire
+νύξ, νυκτός, ἡ                 night
+μακάριος, –α, –ον           blessed, happy (macarism)
+μηδείς, μηδεμία, μηδέν   no one, nothing (subst.)
+τυφλός, –ή, –όν             blind; blind person (subst.)
+πρό                              before, in front of (gen.) (prologue)
+μηδέ                            and not, nor
+ὥστε                            so that
+## Chapter 21
+δέχομαι            I take, receive, welcome
+δικαιόω            I declare righteous, justify
+λογίζομαι         I consider, reckon (theology, apologetics)
+σταυρόω           I crucify
+χαίρω               I rejoice; greetings (charity)
+ἄν                    (particle of indefiniteness: untranslated)
+ἐάν                   if, when
+ἐὰν μή              unless
+ἵνα                   in order that, so that, that
+ὅπου                where
+ὅπως                in order that, that
+ὅστις, ἥτις, ὅ τι     whoever, whatever, who
+ὅταν                    whenever, when
+ὅτε                      when
+ποῦ                     where?
+## Chapter 22
+ἀσπάζομαι              I greet
+ἐπιγινώσκω            I know, understand (Gnostic, agnostic, prognosis)
+ἐργάζομαι              I work, do, perform (ergometer, ergonomics, energy)
+καθίζω                   I sit (cathedral)
+κατοικέω               I live, dwell (economy)
+γενεά, –ᾶς, ἡ         generation, family (generation)
+ἔτος, –ους, τό        year
+θηρίον, τό             animal, beast
+θλῖψις, –εως, ἡ      tribulation, affliction
+χρεία, ἡ                need
+κρίσις, –εως, ἡ       judgment, condemnation (crisis)
+φόβος, ὁ               fear, reverence, respect (phobia)
+φυλακή, ἡ            watch, guard, prison (prophylactic)
+ἔμπροσθεν            in front of, before (gen)
+ἰδού                     behold, look, see
+## Chapter 23
+ἀνίστημι           I stand up, arise (Anastasia)
+ἀποδίδωμι         I give back, pay
+ἀπόλλυμι          I destroy, am lost (mid.) (Apollyon)
+ἀφίημι              I forgive, let go, divorce
+δίδωμι              I give (donation)
+ἵστημι              I stand, set (stand)
+παραδίδωμι      I hand over, betray, entrust
+τίθημι              I put, place, appoint
+φημί                I say, affirm (prophet)
+ἁμαρτωλός, –όν       sinful, sinner (subst.)
+ἔρημος. –όν             desolate; desert, wilderness (subst.)
+μικρός, –ά, –όν        small (microphone, micrometer)
+ὅμοιος, –α, –ον         same nature, similar
+ἄχρι                        until
+οὐαί                        woe`;
+
+// ── Parse ──────────────────────────────────────────────────────────────────
+function parseVocab(raw) {
+  const chapters = {};
+  let current = null;
+  for (const line of raw.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    const chMatch = trimmed.match(/^## Chapter (\d+)/);
+    if (chMatch) {
+      current = parseInt(chMatch[1], 10);
+      chapters[current] = [];
+      continue;
+    }
+    if (current === null) continue;
+    // Split on 2+ whitespace to separate Greek from English
+    const parts = trimmed.split(/\s{2,}/);
+    if (parts.length < 2) continue;
+    const greek = parts[0].trim();
+    const rest  = parts.slice(1).join(' ').trim();
+    // Extract cognate in trailing parentheses (last paren group)
+    const cognateMatch = rest.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+    let english, cognate;
+    if (cognateMatch) {
+      english = cognateMatch[1].trim();
+      cognate = cognateMatch[2].trim();
+    } else {
+      english = rest;
+      cognate = '';
+    }
+    // Clean up trailing/leading punctuation on english
+    english = english.replace(/[,;]\s*$/, '').trim();
+    if (greek && english) {
+      chapters[current].push({ greek, english, cognate });
+    }
+  }
+  return chapters;
+}
+
+// ── State ───────────────────────────────────────────────────────────────────
+const vocab    = parseVocab(RAW);
+const chapters = Object.keys(vocab).map(Number).sort((a, b) => a - b);
+let deck       = [];
+let orderedDeck = [];
+let idx        = 0;
+let mode       = 'ge'; // 'ge' = Greek→English, 'eg' = English→Greek
+let flipped    = false;
+let shuffled   = false;
+
+// ── DOM refs ────────────────────────────────────────────────────────────────
+const card        = document.getElementById('card');
+const frontHint   = document.getElementById('frontHint');
+const frontMain   = document.getElementById('frontMain');
+const frontSub    = document.getElementById('frontSub');
+const backHint    = document.getElementById('backHint');
+const backMain    = document.getElementById('backMain');
+const backSub     = document.getElementById('backSub');
+const progressEl  = document.getElementById('progress');
+const progressBar = document.getElementById('progressBar');
+const btnPrev     = document.getElementById('btnPrev');
+const btnNext     = document.getElementById('btnNext');
+const chapterGrid = document.getElementById('chapterGrid');
+
+// ── Build chapter checkboxes ─────────────────────────────────────────────────
+for (const ch of chapters) {
+  const lbl = document.createElement('label');
+  lbl.className = 'ch-label checked';
+  lbl.innerHTML = `<input type="checkbox" value="${ch}" checked> Ch ${ch}`;
+  lbl.querySelector('input').addEventListener('change', e => {
+    lbl.classList.toggle('checked', e.target.checked);
+    buildDeck();
+  });
+  chapterGrid.appendChild(lbl);
+}
+
+function getCheckedChapters() {
+  return [...chapterGrid.querySelectorAll('input:checked')].map(i => parseInt(i.value, 10));
+}
+
+document.getElementById('btnAll').addEventListener('click', () => {
+  chapterGrid.querySelectorAll('input').forEach(i => { i.checked = true; i.closest('.ch-label').classList.add('checked'); });
+  buildDeck();
+});
+document.getElementById('btnNone').addEventListener('click', () => {
+  chapterGrid.querySelectorAll('input').forEach(i => { i.checked = false; i.closest('.ch-label').classList.remove('checked'); });
+  buildDeck();
+});
+
+// ── Deck building ─────────────────────────────────────────────────────────────
+function buildDeck() {
+  const selected = getCheckedChapters();
+  orderedDeck = selected.flatMap(ch => (vocab[ch] || []).map(w => ({...w, ch})));
+  deck = shuffled ? shuffle([...orderedDeck]) : [...orderedDeck];
+  idx = 0;
+  flipped = false;
+  render();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  card.classList.remove('flipped');
+  flipped = false;
+
+  if (!deck.length) {
+    frontMain.textContent  = '—';
+    frontSub.textContent   = '';
+    backMain.textContent   = '—';
+    backSub.textContent    = '';
+    progressEl.textContent = '0 / 0';
+    progressBar.style.width = '0%';
+    btnPrev.disabled = true;
+    btnNext.disabled = true;
+    return;
+  }
+
+  const w = deck[idx];
+  const cognoteText = w.cognate ? `cognate: ${w.cognate}` : '';
+
+  if (mode === 'ge') {
+    // Front = Greek, Back = English (cognate on English/back)
+    frontHint.textContent = 'GREEK';
+    frontMain.textContent = w.greek;
+    frontSub.textContent  = '';
+    backHint.textContent  = 'ENGLISH';
+    backMain.textContent  = w.english;
+    backSub.textContent   = cognoteText;
+  } else {
+    // Front = English (cognate on English/front), Back = Greek
+    frontHint.textContent = 'ENGLISH';
+    frontMain.textContent = w.english;
+    frontSub.textContent  = cognoteText;
+    backHint.textContent  = 'GREEK';
+    backMain.textContent  = w.greek;
+    backSub.textContent   = '';
+  }
+
+  const n = deck.length;
+  progressEl.textContent  = `${idx + 1} / ${n}`;
+  progressBar.style.width = `${((idx + 1) / n) * 100}%`;
+  btnPrev.disabled = idx === 0;
+  btnNext.disabled = idx === n - 1;
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+function flipCard() {
+  if (!deck.length) return;
+  flipped = !flipped;
+  card.classList.toggle('flipped', flipped);
+}
+
+function navigate(dir) {
+  const next = idx + dir;
+  if (next < 0 || next >= deck.length) return;
+  idx = next;
+  render();
+}
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); navigate(1); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); navigate(-1); }
+});
+
+// Mode buttons
+document.getElementById('btnGE').addEventListener('click', () => {
+  mode = 'ge';
+  document.getElementById('btnGE').classList.add('active');
+  document.getElementById('btnEG').classList.remove('active');
+  render();
+});
+document.getElementById('btnEG').addEventListener('click', () => {
+  mode = 'eg';
+  document.getElementById('btnEG').classList.add('active');
+  document.getElementById('btnGE').classList.remove('active');
+  render();
+});
+
+// Order toggle
+document.getElementById('btnOrdered').addEventListener('click', () => {
+  if (shuffled) {
+    shuffled = false;
+    document.getElementById('btnOrdered').classList.add('active');
+    document.getElementById('btnShuffled').classList.remove('active');
+    deck = [...orderedDeck];
+    idx = 0;
+    render();
+  }
+});
+document.getElementById('btnShuffled').addEventListener('click', () => {
+  if (!shuffled) {
+    shuffled = true;
+    document.getElementById('btnShuffled').classList.add('active');
+    document.getElementById('btnOrdered').classList.remove('active');
+    deck = shuffle([...orderedDeck]);
+    idx = 0;
+    render();
+  }
+});
+
+// Init
+buildDeck();
+</script>
+</body>
+</html>
