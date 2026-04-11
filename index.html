@@ -230,15 +230,15 @@
   }
 
   .card-sub {
-    font-size: 0.82rem;
-    color: #556;
+    font-size: 0.95rem;
+    color: #99a;
     text-align: center;
-    font-style: italic;
+    font-style: normal;
     margin-top: 6px;
   }
 
   .card-face.front .card-sub {
-    color: #667;
+    color: #aab;
   }
 
   .flip-hint {
@@ -688,21 +688,21 @@ const RAW = `## Chapter 1
 λογίζομαι         I consider, reckon (theology, apologetics)
 σταυρόω           I crucify
 χαίρω               I rejoice; greetings (charity)
-ἄν                    untranslated (particle of indefiniteness: untranslated)
+ἄν                    (particle of indefiniteness: untranslated)
 ἐάν                   if, when
 ἐὰν μή              unless
 ἵνα                   in order that, so that, that
 ὅπου                where
 ὅπως                in order that, that
 ὅστις, ἥτις, ὅ τι     whoever, whatever, who
-ὅταν                    whenever, when
+ὅταν                    whenever, when (ὅτε + ἄν)
 ὅτε                      when
 ποῦ                     where?
 ## Chapter 22
 ἀσπάζομαι              I greet
 ἐπιγινώσκω            I know, understand (Gnostic, agnostic, prognosis)
 ἐργάζομαι              I work, do, perform (ergometer, ergonomics, energy)
-καθίζω                   I sit (cathedral)
+καθίζω                   I sit (cathedral [seat of bishop])
 κατοικέω               I live, dwell (economy)
 γενεά, –ᾶς, ἡ         generation, family (generation)
 ἔτος, –ους, τό        year
@@ -753,7 +753,7 @@ function parseVocab(raw) {
     // Extract cognate in trailing parentheses (last paren group)
     const cognateMatch = rest.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
     let english, cognate;
-    if (cognateMatch) {
+    if (cognateMatch && !/^[\u0370-\u03FF\u1F00-\u1FFF]/.test(cognateMatch[2].trim())) {
       english = cognateMatch[1].trim();
       cognate = cognateMatch[2].trim();
     } else {
@@ -762,6 +762,11 @@ function parseVocab(raw) {
     }
     // Clean up trailing/leading punctuation on english
     english = english.replace(/[,;]\s*$/, '').trim();
+    // If no english gloss (entire entry was in parens), restore parens and use as the gloss
+    if (!english && cognate) {
+      english = `(${cognate})`;
+      cognate = '';
+    }
     if (greek && english) {
       chapters[current].push({ greek, english, cognate });
     }
@@ -854,7 +859,7 @@ function render() {
   }
 
   const w = deck[idx];
-  const cognoteText = w.cognate ? `cognate: ${w.cognate}` : '';
+  const cognoteText = w.cognate || '';
 
   if (mode === 'ge') {
     // Front = Greek, Back = English (cognate on English/back)
