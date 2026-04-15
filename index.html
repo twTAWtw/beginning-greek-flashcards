@@ -169,6 +169,30 @@
     font-weight: 600;
   }
 
+  .set-toggle {
+    display: flex;
+    background: #16213e;
+    border: 1px solid #2a3a5c;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .set-btn {
+    padding: 8px 18px;
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .set-btn.active {
+    background: #c9a96e;
+    color: #1a1a2e;
+    font-weight: 600;
+  }
+
   /* Card */
   .card-area {
     width: 100%;
@@ -314,6 +338,13 @@
 <h1>&#x1F4D6; Greek Flashcards</h1>
 
 <div class="controls">
+  <div class="control-row">
+    <label>Set</label>
+    <div class="set-toggle">
+      <button class="set-btn active" id="btnBNTG">BNTG</button>
+      <button class="set-btn" id="btnGDNTG">GDNTG</button>
+    </div>
+  </div>
   <div class="chapter-panel">
     <div class="chapter-panel-header">
       <label>Chapters</label>
@@ -362,7 +393,7 @@
 </div>
 
 <script>
-const RAW = `## Chapter 1
+const RAW_BNTG = `## Chapter 1
 ἀγάπη, ἡ        love
 γῆ, ἡ            earth, land, ground (geology)
 ζωή, ἡ            life (zoo, zoology)
@@ -731,6 +762,540 @@ const RAW = `## Chapter 1
 ἄχρι                        until
 οὐαί                        woe`;
 
+const RAW_GDNTG = `## Chapter 1
+ἀπαγγέλλω        I announce, proclaim, report (45)
+ἀποδίδωμι        I give away, pay, return (48)
+ἄρα                so, then, consequently (49)
+ἄφεσις, ἡ        forgiveness (17)
+ἄχρι               until (conj. or prep. + gen.) (49)
+βάπτισμα, τό    baptism (19)
+δεύτερος          second (43)
+διακονέω          I serve (37)
+διέρχομαι         I go through, cross over (43)
+ἐκπορεύομαι     I go out, come out (33)
+ἐνδύω             I clothe myself, put on, wear (27)
+ἐπιγινώσκω      I know, understand, recognize (44)
+ἔρημος, ἡ        desert, wilderness (48)
+ἑτοιμάζω         I make ready, prepare (40)
+ἔτος, -ους, τό   year (49)
+εὐδοκέω          I am well pleased, approve (21)
+Ἡσαΐας, ὁ        Isaiah (22)
+θηρίον, τό        animal, beast (46)
+θλῖψις, -εως, ἡ  tribulation, affliction, oppression (45)
+θρίξ, τριχός, ἡ  hair (15)
+ἱκανός             qualified, able (39)
+Ἰορδάνης, ὁ      the Jordan (15)
+ἰσχυρός           strong, mighty, powerful (29)
+καθίζω            I cause to sit down, appoint (46)
+κρατέω            I grasp, hold (fast), arrest (47)
+μετάνοια, ἡ      repentance (22)
+ναός, ὁ            temple, sanctuary (45)
+ὅμοιος             like, similar (45)
+ὀπίσω             after, behind (35)
+οὐαί               woe (46)
+οὐκέτι            no longer (47)
+πειράζω           I tempt, test (38)
+ποταμός, ὁ       river (17)
+πρό                before, in front of, at (gen) (47)
+προσφέρω         I bring to, offer (47)
+Σατανᾶς, ὁ       Satan (36)
+σταυρόω          I crucify (46)
+τεσσεράκοντα    forty (22)
+φυλακή, ἡ        watch, guard, prison (47)
+χώρα, ἡ           district, region (28)
+## Chapter 2
+ἁμαρτάνω        to sin (43)
+ἄξιος              worthy, fit, deserving (41)
+ἅπτω              I touch, take hold of (39)
+ἄρχων, -οντος, ὁ    ruler, authority, judge (37)
+βούλομαι         I wish, want, desire (37)
+δέω                bind, tie (43)
+ἐγγίζω            I draw near, approach (42)
+ἑκατόν            one hundred (17)
+ἐκεῖθεν           from there (37)
+ἐλέγχω           reprove, correct (17)
+ἐμαυτοῦ          (of) myself (37)
+ἔμπροσθεν       in front of, before (48)
+ἐπιτίθημι        I lay upon, put upon (39)
+ἐργάζομαι        I work, do, perform (41)
+εὐλογέω          I bless, praise (42)
+θαυμάζω         I marvel, am amazed, wonder (43)
+θεραπεύω        I heal, restore, serve (43)
+θύρα, ἡ           door, gate, entrance (39)
+καινός             new, unused (42)
+καλῶς             well (37)
+καυχάομαι       I boast, glory (37)
+κερδαίνω         to gain (17)
+λύω                loose (42)
+μαρτυρία, ἡ     testimony, witness (37)
+μάρτυς, ὁ        witness (35)
+μικρός             small, short (46)
+οἰκοδομέω       I build (up), erect, edify (40)
+οὗ                  where (25)
+παραλαμβάνω   take (to oneself), take with/along (49)
+παρίστημι        I place beside, present (41)
+πέντε              five (38)
+περισσεύω        I exceed, overflow, abound (39)
+πλανάω           go astray, be misled, wander about aimlessly (39)
+πράσσω           I do, accomplish, practice (39)
+πρόβατον, τό    sheep (39)
+σπέρμα, -ατος, τό    seed, descendants, children (43)
+τέλος, -ους, τό  end, goal (40)
+τελώνης, ὁ       tax-collector (21)
+τέσσαρες         four (41)
+ὥσπερ            (just) as, so (36)
+## Chapter 3
+ἀγρός, ὁ          field, country (36)
+ἀκάθαρτος        unclean, impure (32)
+ἀκροβυστία, ἡ   uncircumcision (20)
+ἀναγινώσκω     I read (aloud) (32)
+ἄνεμος, ὁ         wind (31)
+ἀρνέομαι          I deny, reject (33)
+βιβλίον, τό       book, scroll (34)
+διαθήκη, ἡ       covenant, decree, last will and testament (33)
+διακονία, ἡ       service, office, ministry, deacon (34)
+δικαιόω           I justify, vindicate (39)
+διότι               for, because, therefore (23)
+δυνατός           powerful, strong, mighty, able (32)
+ἐγγύς              near, close to (31)
+ἔξεστι             it is lawful, permitted (31)
+ἐπίγνωσις, -εως, ἡ    knowledge, recognition (20)
+εὐθέως            immediately (36)
+ἐχθρός            hostile, hated (32)
+ἥλιος, ὁ           sun (32)
+ἱερεύς, -εως, ὁ  priest (31)
+καθαρίζω         I cleanse, purify (31)
+καταργέω         I cancel, nullify, make void (27)
+λογίζομαι         I account, reckon, conclude (40)
+μέλος, -ους, τό  member, part, limb (34)
+ναί                  yes, certainly, indeed (33)
+νυνί                now (20)
+ὀργή, ἡ            anger, wrath, punishment (36)
+οὖς, ὠτός, τό    ear, hearing (36)
+παραγίνομαι     I come, arrive, appear (37)
+παρρησία, ἡ      confidence, boldness (31)
+περιτομή, ἡ       circumcision (36)
+πλήν               yet, however, but (31)
+ποῖος              of what kind? (33)
+ποτήριον, τό     cup (31)
+ποῦ                where? (48)
+πτωχός           poor (34)
+ὑποστρέφω       I turn back, return (35)
+ὑστερέω          I fall short of, lack (16)
+φανερόω          I reveal, make manifest, show (49)
+Φίλιππος, ὁ      Philip (36)
+χωρίς              without, apart from (41)
+## Chapter 4
+ἀγοράζω          I buy, purchase (30)
+ἀδικέω            I do wrong, treat unjustly (28)
+ἀληθινός          true, real, genuine (28)
+ἀνάγκη, ἡ        necessity, pressure (17)
+ἅπαξ              once and for all (14)
+ἀρνίον, τό        lamb, sheep (30)
+ἁρπάζω           I grasp, snatch, seize (14)
+Βαρναβᾶς, ὁ     Barnabas (28)
+γαμέω             I marry (28)
+γνῶσις, -εως, ἡ  knowledge (29)
+διακρίνω          I discriminate, judge, doubt (19)
+ἐλεέω             I have mercy on (29)
+ἔλεος, -ους, τό   mercy, compassion (27)
+ἐπιθυμία, ἡ       lust, craving, desire (39)
+ἐπικαλέω         I call (upon), name (30)
+ἐπιτιμάω         I rebuke, reprove, warn (29)
+ἡγέομαι           I lead, think, consider (28)
+θυγάτηρ, -τρός, ἡ    daughter, girl (28)
+θυσία, ἡ           sacrifice, offering (28)
+Ἰάκωβος, ὁ       James (42)
+ἴδε                  look, see, behold (29)
+Ἰούδας, ὁ         Jude, Judah, Judas (44)
+Καῖσαρ, -αρος, ὁ     Caesar, emperor (29)
+μάχαιρα, ἡ       sword (29)
+μιμνῄσκομαι     I remember, recollect (23)
+μισέω              I hate, detest (40)
+μισθός, ὁ         pay, wages, reward (29)
+παράκλησις, -εως, ἡ    encouragement, comfort (29)
+παρέρχομαι       I pass by, neglect, disobey (29)
+πάσχα, τό         Passover (29)
+ποτέ               once, formerly, ever (29)
+σκανδαλίζω      I cause to stumble (29)
+σκότος, -ους, τό  darkness (31)
+συνείδησις, -εως, ἡ    conscience (30)
+σωτήρ, -ῆρος, ἡ  savior, deliverer (24)
+σωτηρία, ἡ        salvation, deliverance (46)
+φίλος              beloved, friend (29)
+φόβος, ὁ          fear, reverence, respect (47)
+φυλάσσω         I guard, protect (31)
+φυλή, ἡ           tribe, nation, people (31)
+## Chapter 5
+ἀδικία, ἡ          unrighteousness, injustice (25)
+ἀληθής            true, honest, genuine (26)
+ἀναβλέπω        I look up, see again, receive sight (25)
+ἄρτι               now (36)
+ἀσθενής           weak, powerless, sick (26)
+βαστάζω          I bear, endure (27)
+γάμος, ὁ          wedding, marriage (16)
+γέ                   indeed, even (25)
+γεύομαι           I taste, experience (15)
+γνωρίζω          I make known, reveal, know (25)
+δέκα               ten (25)
+δένδρον, τό      tree (25)
+διάκονος, ὁ       servant, deacon (29)
+δουλεύω          I am a slave, serve, obey (25)
+ἐκχέω             I pour out, shed (27)
+Ἕλλην, -ηνος, ὁ  a Greek, gentile, pagan (25)
+ἕνεκα              because of, on account of, for the sake of (26)
+ἥκω               I have come (26)
+Ἰακώβ, ὁ          Jacob (27)
+καθαρός           clean, pure (27)
+κεῖμαι             I lie, recline (24)
+λυπέω             I grieve, offend (26)
+Μαρία, ἡ          Mary (27)
+Μαριάμ, ἡ        Mary (27)
+μυστήριον, τό    mystery, secret (28)
+νικάω              I conquer, overcome (28)
+νυμφίος, ὁ        bridegroom (16)
+οἶνος, ὁ           wine (34)
+πνευματικός      spiritual (26)
+πόθεν              from where? (29)
+πόσος             how great/much/many (?) (27)
+προφητεύω       I prophesy (28)
+σός                 your (27)
+σταυρός, ὁ        cross (27)
+στρατιώτης, ὁ    soldier (26)
+συνίημι            I understand, comprehend (26)
+τελέω              I finish, complete (28)
+φρονέω            I think, ponder (26)
+φωνέω             I call (43)
+χήρα, ἡ           widow (26)
+## Chapter 6
+ἁμαρτωλός, ὁ          sinner (47)
+ἀμπελών, -ῶνος, ὁ     vineyard (23)
+ἀνάγω                  I lead up, restore (23)
+ἀναιρέω                I take away, destroy, kill (24)
+ἄπιστος                faithless, unbelieving (23)
+ἀσθένεια, ἡ            weakness, sickness, disease (24)
+ἀσθενέω                I am weak, sick, in need (33)
+ἀστήρ, -έρος, ὁ        star (24)
+αὐξάνω                 I grow, increase (23)
+δέησις, -εως, ἡ        prayer, entreaty, petition (18)
+εἰκών, -όνος, ἡ        image, likeness, form (23)
+ἐλεύθερος              free (23)
+ἐνεργέω                I work, produce (21)
+ἑορτή, ἡ               festival (25)
+ἐπιστολή, ἡ            letter, epistle (24)
+ἐπιστρέφω              I turn (around/back), return (36)
+Ἡλίας, ὁ               Elijah (29)
+ἰάομαι                 I heal, cure, restore (26)
+ἰσχύω                  I am strong, powerful, able (28)
+καταλείπω              I leave (behind), abandon, neglect (24)
+κελεύω                 I command, order, urge (25)
+κρίσις, -εως, ἡ        judgment, condemnation (47)
+λευκός                 white, bright, shining (25)
+μανθάνω                I learn (25)
+μήν, -ός, ὁ            month, new moon (18)
+μήποτε                 never, lest (25)
+μήτε                   and not, nor (34)
+νεφέλη, ἡ              cloud (25)
+νοῦς, νοός, ὁ          mind, understanding (24)
+ὀμνύω                  I swear, take an oath (26)
+παῖς, παιδός, ὁ/ἡ     boy, child, son, servant (24)
+πάρειμι                I am present, have come (24)
+παρουσία, ἡ            coming, arrival (24)
+πίμπλημι               I fill, fulfill (24)
+πλῆθος, -ους, τό       multitude, large amount, crowd (31)
+πορνεία, ἡ             (sexual) immorality (25)
+προσευχή, ἡ            prayer (36)
+προσέχω                I pay attention to, devote myself to (24)
+προσκαλέω              I summon, call, invite (29)
+Τιμόθεος, ὁ            Timothy (24)
+## Chapter 7
+ἁγιάζω                 I sanctify, make holy, reverence (28)
+ἀγνοέω                 I do not know, am ignorant (22)
+Αἴγυπτος, ἡ            Egypt (25)
+ἀναχωρέω               I go away, withdraw (14)
+ἀντί                   instead of, for, in behalf of (22)
+βασιλεύω               I reign, rule (21)
+δέομαι                 I ask, pray, beg (22)
+δοκιμάζω               I examine, test, prove (22)
+ἐκλέγομαι              I choose, elect (22)
+ἐκλεκτός               chosen, elect (22)
+ζῷον, τό               living thing/being, animal (23)
+Ἡρῴδης, ὁ              Herod (43)
+θεάομαι                I see, look at, behold (22)
+θυσιαστήριον, τό       altar (23)
+Ἰουδαία, ἡ             Judea (43)
+Ἰωσήφ, ὁ               Joseph (35)
+καθεύδω                I sleep (22)
+κἀκεῖνος               and that one, he also (22)
+κατεργάζομαι           I do, achieve, accomplish (22)
+κατηγορέω              I accuse (23)
+κατοικέω               I live, dwell, reside (44)
+κοιλία, ἡ              belly, stomach, womb (22)
+κοπιάω                 I work hard, labor (23)
+κωλύω                  I hinder, prevent (23)
+Μακεδονία, ἡ           Macedonia (22)
+μέρος, -ους, τό        part, share, district (42)
+μηκέτι                 no longer (22)
+νέος                   new, fresh, young (23)
+πεινάω                 I hunger, am hungry (23)
+πειρασμός, ὁ           temptation, trial, test (21)
+πέραν                  on the other side (23)
+περιβάλλω              I put on, clothe, dress (23)
+πληγή, ἡ               blow, plague, wound (22)
+ῥύομαι                 I rescue, deliver (17)
+σήμερον                today (41)
+σκεῦος, τό             vessel, jar, object (23)
+τελειόω                I complete, make perfect (23)
+φαίνω                  I shine, appear (31)
+χαρίζομαι              I give freely, grant (23)
+χιλιάς, -άδος, ἡ       a thousand (23)
+## Chapter 8
+αἰτία, ἡ               cause, reason, accusation (20)
+ἅπας                   all, everybody, everything (34)
+ἀπέχω                  I have received, am distant (19)
+ἀργύριον, τό           silver, money (20)
+γενεά, ἡ               generation, family (43)
+γένος, -ους, τό        race, descendant, family (20)
+γεωργός, ὁ             farmer (19)
+γονεύς, -έως, ὁ        parent (20)
+διαμαρτύρομαι          I solemnly urge, exhort, warn (15)
+διδαχή, ἡ              teaching [as content] (30)
+ἑκατοντάρχης, ὁ        centurion, captain, officer (20)
+ἐφίστημι               I stand by, appear (21)
+ἡγεμών, -όνος, ὁ       governor, ruler, leader (20)
+θερίζω                 I reap, harvest (21)
+Ἰσαάκ, ὁ               Isaac (20)
+ἰχθύς, -ύος, ὁ         fish (20)
+καθίστημι              I bring, appoint (21)
+κοινωνία, ἡ            fellowship, communion (19)
+λατρεύω                I serve, worship (21)
+μετανοέω               I repent (34)
+μνημονεύω              I remember, think of, mention (21)
+νηστεύω                I fast (20)
+ξύλον, τό              wood, tree, cross (20)
+προάγω                 I lead out (20)
+προστίθημι             I add (to), increase (18)
+πωλέω                  I sell (22)
+σκηνή, ἡ               tent, booth, tabernacle (20)
+σοφός                  wise, clever, skillful (20)
+στρέφω                 I turn, return (21)
+συνέδριον, τό          Sanhedrin, council (22)
+τέρας, -ατος, τό       wonder (16)
+τιμάω                  I honor, revere (21)
+τοσοῦτος, -αύτη, -οῦτον    so great, so large, so many (20)
+τρέχω                  I run (20)
+τροφή, ἡ               food, nourishment (16)
+ὑπακούω                I obey, follow (21)
+ὑπηρέτης, ὁ            servant, helper, assistant (20)
+χιλίαρχος, ὁ           military tribune, high ranking officer (21)
+χρεία, ἡ               need, lack, necessity (49)
+ὡσεί                   as, like, about (21)
+## Chapter 9
+ἀδελφή, ἡ              sister (26)
+ἀληθῶς                 truly, really (18)
+Ἀντιόχεια, ἡ           Antioch (18)
+ἀποκάλυψις, -εως, ἡ    revelation (18)
+ἀπώλεια, ἡ             destruction, ruin (18)
+ἀριθμός, ὁ             number, total (18)
+Ἀσία, ἡ                Asia (18)
+βλασφημία, ἡ           blasphemy, slander (18)
+δεσμός, ὁ              bond, chain, prison (18)
+δῶρον, τό              gift, present, offering (19)
+εἰσπορεύομαι           I go in, enter (18)
+ἐπαίρω                 I lift up (19)
+ἐπάνω                  above, over (19)
+ἐπιβάλλω               I throw over, lay on, put on (18)
+εὐχαριστέω             I give thanks, am thankful (38)
+θυμός, ὁ               passion, anger, rage (18)
+καταγγέλλω             I proclaim, make known (18)
+κατακρίνω              I condemn, pass judgment on (18)
+κενός                  empty, vain (18)
+κλαίω                  I weep, cry (40)
+κληρονομέω             I inherit, obtain (18)
+κοιμάω                 I (fall) asleep, die (18)
+κρείττων               better (19)
+κριτής, ὁ              judge (19)
+κτίσις, -εως, ἡ        creation, creature (19)
+κώμη, ἡ                village, small town (27)
+Λάζαρος, ὁ             Lazarus (15)
+μαρτύριον, τό          testimony, witness, proof (19)
+μεριμνάω               I am anxious, worry (19)
+μνημεῖον, τό           grave, tomb (40)
+οὔπω                   not yet (26)
+παλαιός                old, former (19)
+πάντοτε                always (41)
+παράπτωμα, -ατος, τό   transgression, trespass, sin (19)
+παρατίθημι             I place before (19)
+πότε                   when? (19)
+προφητεία, ἡ           prophecy (19)
+συνέρχομαι             I come/travel together, go with (30)
+ταράσσω                I stir up, disturb, trouble (17)
+φιλέω                  I love, like, kiss (25)
+## Chapter 10
+ἀνθίστημι              I resist, oppose (14)
+ἀποκαλύπτω             I reveal, uncover (26)
+ἀρέσκω                 I please (17)
+βρῶμα, -ατος, τό       food (17)
+γρηγορέω               I am awake, alert, watchful (22)
+διάβολος, ὁ            devil, accuser, slanderous (adj) (37)
+ἐξίστημι               I amaze, confuse (17)
+ἐπαύριον               tomorrow (17)
+ἕτοιμος                ready, prepared (17)
+θησαυρός, ὁ            treasure, storehouse (17)
+ἵππος, ὁ               horse (17)
+Καισάρεια, ἡ           Caesarea (17)
+κἄν                    and if, even if, if only (17)
+καταλύω                I throw down, destroy, abolish (17)
+κατέχω                 I hold back, restrain, hold fast, possess (17)
+κόπος, ὁ               work, labor (18)
+κρυπτός                hidden, secret (17)
+κρύπτω                 I hide, conceal, cover (18)
+μήτι                   (interrogative particle expecting a negative answer) (18)
+νίπτω                  I wash (17)
+οἰκοδομή, ἡ            edification, building (18)
+ὀλίγος                 little, few (40)
+ὁμοίως                 likewise, similarly (30)
+οὔ                     no (17)
+πάθημα, -ατος, τό      suffering (16)
+παραχρῆμα              at once, immediately (18)
+πάσχω                  I suffer (42)
+περιτέμνω              I circumcise (17)
+πλήρωμα, -ατος, τό     fullness, fulfillment (17)
+ποιμήν, -ένος, ὁ       shepherd (18)
+πόλεμος, ὁ             war, battle, fight (18)
+πολλάκις               often, frequently, many times (18)
+πυλών, -ῶνος, ὁ        gate, entrance (18)
+στέφανος, ὁ            crown, wreath, reward (18)
+τίκτω                  I bear, give birth to, bring forth (18)
+τύπος, ὁ               type, example, pattern (15)
+ὑποτάσσω               I subject (38)
+ὑψόω                   I exalt, lift up (20)
+φανερός                manifest, visible, clear (18)
+χρυσοῦς               golden (18)
+## Chapter 11
+ἀθετέω                 I nullify, reject, set aside (16)
+ἀνακρίνω               I judge, examine, call to account (16)
+δείκνυμι               I show (33)
+δεῖπνον, τό            dinner, supper, banquet (16)
+δέσμιος, ὁ             prisoner (16)
+δηνάριον, τό           denarius (16)
+διαλογίζομαι           I consider, ponder, reason (16)
+διατάσσω               I order, direct, command (16)
+διψάω                  I am thirsty, long for (16)
+διώκω                  I pursue (45)
+ἐκτείνω                I stretch out (16)
+ἐλπίζω                 I hope (31)
+ἐμβαίνω                I go in, step in, embark (16)
+ἔπειτα                 then, next (16)
+ἐπιθυμέω               I desire, long for, lust for (16)
+ἐπιλαμβάνομαι          I take hold of, catch, arrest (19)
+ἐπιμένω                I stay, remain, persevere (16)
+ἐργάτης, ὁ             laborer, worker (16)
+εὐλογία, ἡ             blessing, praise (16)
+εὐσέβεια, ἡ            godliness, piety (15)
+Ἔφεσος, ἡ              Ephesus (16)
+ζῆλος, ὁ/τό            jealousy, envy (16)
+θεμέλιος, ὁ            foundation (15)
+κακῶς                  badly, wrongly, wickedly (16)
+κατέρχομαι             I come down, arrive, put in (16)
+μέχρι                  until (17)
+ὁμολογέω               I confess, profess (26)
+παραγγέλλω             I command, charge (32)
+παρέχω                 I offer, grant (16)
+πλησίον                neighbor (17)
+πλούσιος               rich, wealthy (28)
+πλοῦτος, ὁ/τό          wealth, riches (22)
+ῥίζα, ἡ                root, source, shoot, descendant (17)
+τιμή, ἡ                honor, value, price (41)
+ὑποκριτής, ὁ           hypocrite, pretender (17)
+ὑπομένω                I remain, endure (17)
+ὑπομονή, ἡ             endurance, perseverance, patience (32)
+φεύγω                  I flee, avoid (29)
+χάρισμα, -ατος, τό     gift, favor (17)
+ὦ                      O (direct address) (17)
+## Chapter 12
+ἀνέχω                  I endure, bear with (15)
+ἀνομία, ἡ              lawlessness (15)
+ἀπάγω                  I lead away, bring before (15)
+βλασφημέω              I blaspheme, defame, slander (34)
+γνωστός                known, notable (15)
+γυμνός                 naked, poorly dressed (15)
+Δαμασκός, ἡ            Damascus (15)
+δέρω                   I skin, beat (15)
+διδασκαλία, ἡ          teaching, instruction (21)
+εἶτα                   then, furthermore (15)
+ἐντέλλομαι             I command (15)
+ἐπαγγέλλομαι           I announce, proclaim, promise (15)
+εὐχαριστία, ἡ          thankfulness, thanksgiving (15)
+καταλαμβάνω            I seize, attain, overtake (15)
+Καφαρναούμ, ἡ          Capernaum (16)
+κλείω                  I shut, close, lock (16)
+κλέπτης, ὁ             thief (16)
+κληρονόμος, ὁ          heir (15)
+κτίζω                  I create, make (15)
+λῃστής, ὁ              robber, bandit, revolutionary (15)
+λύπη, ἡ                grief, sorrow, pain (16)
+μοιχεύω                I commit adultery (15)
+νομίζω                 I think, suppose (15)
+ξηραίνω                I dry (up), wither (15)
+ὅθεν                   from where (15)
+οἰκουμένη, ἡ           world, inhabited earth, humankind (15)
+ὁμοιόω                 I compare, make like (15)
+οὐδέποτε               never (16)
+περισσότερος           greater, more (16)
+πλήρης                 filled, full, complete (16)
+προσδοκάω              I wait for, look for, expect (16)
+σεαυτοῦ                yourself (43)
+σκοτία, ἡ              darkness (16)
+συκῆ, ἡ                fig tree (16)
+συλλαμβάνω             I arrest, catch, become pregnant (16)
+συνίστημι              I recommend, commend (16)
+σφραγίς, -ῖδος, ἡ      seal, mark, inscription (16)
+τολμάω                 I dare, am courageous (16)
+χορτάζω                I feed, satisfy (16)
+ὡσαύτως                likewise, similarly (17)
+## Chapter 13
+ἄκανθα, ἡ              thorn (14)
+ἀκοή, ἡ                hearing, report, ear (24)
+ἀλλότριος              strange, foreign (14)
+ἀμφότεροι              both, all (14)
+ἀναγγέλλω              I report, announce, proclaim (14)
+ἀνάκειμαι              I lie, recline (14)
+ἀνάστασις, -εως, ἡ     resurrection (42)
+ἀπειθέω                I disobey (14)
+ἀτενίζω                I look intently (14)
+αὔριον                 tomorrow, soon (14)
+ἀφίστημι               I mislead, go away, fall away (14)
+γράμμα, -ατος, τό      letter (of alphabet), document (14)
+διαλογισμός, ὁ         thought, opinion, dispute (14)
+ἕκτος                  sixth (14)
+ἐλάχιστος              smallest, least, insignificant (14)
+ἐπεί                   because, since, for (25)
+ἐπιτρέπω               I allow, permit (18)
+ἐπουράνιος             heavenly, in heaven (19)
+κρίμα, -ατος, τό       judging, judgment (27)
+νήπιος, ὁ              infant, child (15)
+ὀφείλω                 I owe, ought (35)
+ὀψία                   late, evening (15)
+παρθένος, ἡ/ὁ          virgin (15)
+παύω                   I stop, cease (15)
+πέτρα, ἡ               rock, stone (15)
+ποτίζω                 I water, give to drink (15)
+προλέγω                I tell beforehand (15)
+πώς                    somehow, perhaps (15)
+ῥαββί                  rabbi, master, teacher (15)
+σαλεύω                 I shake (15)
+Σαῦλος, ὁ              Saul (15)
+σκάνδαλον, τό          stumbling block, trap, temptation (15)
+συμφέρω                I bring together (15)
+σφραγίζω               I seal, mark, certify (15)
+ταχέως                 quickly, soon, hastily (15)
+τέλειος                perfect, complete, mature, adult (19)
+τράπεζα, ἡ             table, meal, food (15)
+ὑπακοή, ἡ              obedience (15)
+χόρτος, ὁ              grass, hay (15)
+ὠφελέω                 I help, aid, benefit (15)`;
+
 // ── Parse ──────────────────────────────────────────────────────────────────
 function parseVocab(raw) {
   const chapters = {};
@@ -775,8 +1340,8 @@ function parseVocab(raw) {
 }
 
 // ── State ───────────────────────────────────────────────────────────────────
-const vocab    = parseVocab(RAW);
-const chapters = Object.keys(vocab).map(Number).sort((a, b) => a - b);
+const vocabSets = { bntg: parseVocab(RAW_BNTG), gdntg: parseVocab(RAW_GDNTG) };
+let activeSet  = 'bntg';
 let deck       = [];
 let orderedDeck = [];
 let idx        = 0;
@@ -799,15 +1364,19 @@ const btnNext     = document.getElementById('btnNext');
 const chapterGrid = document.getElementById('chapterGrid');
 
 // ── Build chapter checkboxes ─────────────────────────────────────────────────
-for (const ch of chapters) {
-  const lbl = document.createElement('label');
-  lbl.className = 'ch-label checked';
-  lbl.innerHTML = `<input type="checkbox" value="${ch}" checked> Ch ${ch}`;
-  lbl.querySelector('input').addEventListener('change', e => {
-    lbl.classList.toggle('checked', e.target.checked);
-    buildDeck();
-  });
-  chapterGrid.appendChild(lbl);
+function buildChapterGrid() {
+  chapterGrid.innerHTML = '';
+  const chapters = Object.keys(vocabSets[activeSet]).map(Number).sort((a, b) => a - b);
+  for (const ch of chapters) {
+    const lbl = document.createElement('label');
+    lbl.className = 'ch-label checked';
+    lbl.innerHTML = `<input type="checkbox" value="${ch}" checked> Ch ${ch}`;
+    lbl.querySelector('input').addEventListener('change', e => {
+      lbl.classList.toggle('checked', e.target.checked);
+      buildDeck();
+    });
+    chapterGrid.appendChild(lbl);
+  }
 }
 
 function getCheckedChapters() {
@@ -825,6 +1394,7 @@ document.getElementById('btnNone').addEventListener('click', () => {
 
 // ── Deck building ─────────────────────────────────────────────────────────────
 function buildDeck() {
+  const vocab = vocabSets[activeSet];
   const selected = getCheckedChapters();
   orderedDeck = selected.flatMap(ch => (vocab[ch] || []).map(w => ({...w, ch})));
   deck = shuffled ? shuffle([...orderedDeck]) : [...orderedDeck];
@@ -947,7 +1517,26 @@ document.getElementById('btnShuffled').addEventListener('click', () => {
   render();
 });
 
+// Set toggle
+document.getElementById('btnBNTG').addEventListener('click', () => {
+  if (activeSet === 'bntg') return;
+  activeSet = 'bntg';
+  document.getElementById('btnBNTG').classList.add('active');
+  document.getElementById('btnGDNTG').classList.remove('active');
+  buildChapterGrid();
+  buildDeck();
+});
+document.getElementById('btnGDNTG').addEventListener('click', () => {
+  if (activeSet === 'gdntg') return;
+  activeSet = 'gdntg';
+  document.getElementById('btnGDNTG').classList.add('active');
+  document.getElementById('btnBNTG').classList.remove('active');
+  buildChapterGrid();
+  buildDeck();
+});
+
 // Init
+buildChapterGrid();
 buildDeck();
 </script>
 </body>
