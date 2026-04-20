@@ -595,6 +595,22 @@
     color: #777;
     font-weight: normal;
   }
+
+  @media (max-width: 520px) {
+    .control-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .mode-toggle,
+    .order-toggle,
+    .set-toggle {
+      width: 100%;
+    }
+    .set-btn,
+    .order-btn {
+      flex: 1;
+    }
+  }
 </style>
 </head>
 <body>
@@ -619,7 +635,7 @@
   </div>
 </div>
 
-<details class="keymap" open>
+<details class="keymap">
   <summary>Key Reference</summary>
   <div class="km-grid" id="kmGrid"></div>
   <hr class="km-rule">
