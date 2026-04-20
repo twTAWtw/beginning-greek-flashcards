@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Greek Flashcards</title>
 <style>
+  @font-face {
+    font-family: 'SBL BibLit';
+    src: url('SBL_BLit.ttf') format('truetype');
+    font-weight: normal; font-style: normal;
+  }
+
+  :root { --gk: 'SBL BibLit', 'Palatino Linotype', Palatino, Georgia, serif; }
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
@@ -240,6 +248,7 @@
   }
 
   .card-main {
+    font-family: var(--gk);
     font-size: 2.2rem;
     font-weight: 500;
     color: #f0e6d0;
@@ -254,6 +263,7 @@
   }
 
   .card-sub {
+    font-family: var(--gk);
     font-size: 0.95rem;
     color: #99a;
     text-align: center;
@@ -334,10 +344,17 @@
 
   /* Search */
   .search-wrap {
-    position: relative;
+    display: flex;
+    gap: 10px;
     width: 100%;
     max-width: 560px;
     margin-bottom: 16px;
+  }
+
+  .search-box {
+    position: relative;
+    flex: 1;
+    min-width: 0;
   }
 
   .search-input {
@@ -347,7 +364,7 @@
     border-radius: 8px;
     color: #e0e0e0;
     font-size: 0.92rem;
-    padding: 9px 12px 9px 38px;
+    padding: 9px 12px 9px 32px;
     outline: none;
     transition: border-color 0.2s;
     -webkit-appearance: none;
@@ -356,15 +373,34 @@
   .search-input::placeholder { color: #555; }
   .search-input:focus { border-color: #c9a96e; }
 
+  .search-input-gr {
+    font-family: var(--gk);
+    font-size: 1rem;
+    padding-right: 36px;
+  }
+
   .search-icon {
     position: absolute;
-    left: 12px;
+    left: 10px;
     top: 50%;
     transform: translateY(-50%);
     color: #555;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     pointer-events: none;
     line-height: 1;
+  }
+
+  .search-pending {
+    position: absolute;
+    right: 9px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.72rem;
+    color: #c9a96e;
+    pointer-events: none;
+    font-family: monospace;
+    line-height: 1;
+    letter-spacing: -0.02em;
   }
 
   .search-results {
@@ -385,11 +421,11 @@
   .search-results.open { display: block; }
 
   .search-result-item {
-    padding: 10px 14px;
+    padding: 10px 12px;
     cursor: pointer;
     border-bottom: 1px solid #1e2840;
     display: flex;
-    gap: 12px;
+    gap: 10px;
     align-items: baseline;
   }
 
@@ -401,6 +437,7 @@
     color: #f0e6d0;
     font-size: 1rem;
     flex-shrink: 0;
+    font-family: var(--gk);
   }
 
   .sri-english {
@@ -424,6 +461,140 @@
     font-size: 0.85rem;
     text-align: center;
   }
+
+  /* Key reference */
+  .keymap {
+    width: 100%;
+    max-width: 560px;
+    background: #16213e;
+    border: 1px solid #2a3a5c;
+    border-radius: 10px;
+    padding: 10px 14px 12px;
+    margin-bottom: 20px;
+  }
+
+  .keymap summary {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #666;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 0;
+    outline: none;
+  }
+
+  .keymap summary::-webkit-details-marker { display: none; }
+
+  .keymap summary::after {
+    content: '▾';
+    font-size: 0.6rem;
+    color: #555;
+  }
+
+  details.keymap[open] summary {
+    margin-bottom: 10px;
+  }
+
+  details.keymap[open] summary::after {
+    content: '▴';
+  }
+
+  .km-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+
+  .km-cell {
+    background: #1a1a2e;
+    border: 1px solid #263050;
+    border-radius: 5px;
+    padding: 4px 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+  }
+
+  .km-key {
+    font-family: monospace;
+    font-size: 0.65rem;
+    color: #555;
+    line-height: 1;
+  }
+
+  .km-lo {
+    font-family: var(--gk);
+    font-size: 1rem;
+    color: #f0e6d0;
+    line-height: 1.2;
+  }
+
+  .km-hi {
+    font-family: var(--gk);
+    font-size: 0.68rem;
+    color: #666;
+    line-height: 1;
+  }
+
+  .km-rule {
+    border: none;
+    border-top: 1px solid #1e2840;
+    margin: 8px 0;
+  }
+
+  .km-diacritics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .km-diac {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    background: #1a1a2e;
+    border: 1px solid #263050;
+    border-radius: 5px;
+    padding: 3px 7px 3px 6px;
+  }
+
+  .km-diac-key {
+    font-family: monospace;
+    font-size: 0.78rem;
+    color: #c9a96e;
+    line-height: 1;
+  }
+
+  .km-diac-ex {
+    font-family: var(--gk);
+    font-size: 0.9rem;
+    color: #aaa;
+  }
+
+  .km-diac-name {
+    font-size: 0.68rem;
+    color: #555;
+  }
+
+  .km-note {
+    font-size: 0.72rem;
+    color: #555;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  .km-note strong {
+    font-family: var(--gk);
+    color: #777;
+    font-weight: normal;
+  }
 </style>
 </head>
 <body>
@@ -431,10 +602,40 @@
 <h1>&#x1F4D6; Greek Flashcards</h1>
 
 <div class="search-wrap" id="searchWrap">
-  <span class="search-icon">&#x2315;</span>
-  <input type="search" class="search-input" id="searchInput" placeholder="Search Greek or English…" autocomplete="off" autocorrect="off" spellcheck="false">
-  <div class="search-results" id="searchResults"></div>
+  <div class="search-box">
+    <span class="search-icon">&#x2315;</span>
+    <input type="search" class="search-input" id="searchEN"
+      placeholder="Search English…"
+      autocomplete="off" autocorrect="off" spellcheck="false">
+    <div class="search-results" id="searchResultsEN"></div>
+  </div>
+  <div class="search-box">
+    <span class="search-icon">&#x2315;</span>
+    <input type="search" class="search-input search-input-gr" id="searchGR"
+      placeholder="Search Greek (a→α)…"
+      autocomplete="off" autocorrect="off" spellcheck="false" autocapitalize="off">
+    <span class="search-pending" id="searchPending"></span>
+    <div class="search-results" id="searchResultsGR"></div>
+  </div>
 </div>
+
+<details class="keymap" open>
+  <summary>Key Reference</summary>
+  <div class="km-grid" id="kmGrid"></div>
+  <hr class="km-rule">
+  <div class="km-diacritics">
+    <div class="km-diac"><span class="km-diac-key">)</span><span class="km-diac-ex">ἀ</span><span class="km-diac-name">smooth</span></div>
+    <div class="km-diac"><span class="km-diac-key">(</span><span class="km-diac-ex">ἁ</span><span class="km-diac-name">rough</span></div>
+    <div class="km-diac"><span class="km-diac-key">/</span><span class="km-diac-ex">ά</span><span class="km-diac-name">acute</span></div>
+    <div class="km-diac"><span class="km-diac-key">\</span><span class="km-diac-ex">ὰ</span><span class="km-diac-name">grave</span></div>
+    <div class="km-diac"><span class="km-diac-key">=</span><span class="km-diac-ex">ᾶ</span><span class="km-diac-name">circumflex</span></div>
+    <div class="km-diac"><span class="km-diac-key">|</span><span class="km-diac-ex">ᾳ</span><span class="km-diac-name">iota sub</span></div>
+    <div class="km-diac"><span class="km-diac-key">+</span><span class="km-diac-ex">ϊ</span><span class="km-diac-name">diaeresis</span></div>
+  </div>
+  <p class="km-note">
+    Combine before or after vowel: <strong>)a/</strong> → ἄ &nbsp;·&nbsp; <strong>(w=|</strong> → ᾧ &nbsp;·&nbsp; Shift for Α Β Γ…
+  </p>
+</details>
 
 <div class="controls">
   <div class="control-row">
@@ -1634,95 +1835,225 @@ document.getElementById('btnGDNTG').addEventListener('click', () => {
   buildDeck();
 });
 
+// ── Transliteration engine (typegreek keys → polytonic Greek) ────────────────
+const TG = {
+  SMOOTH: '\u0313', ROUGH: '\u0314', ACUTE: '\u0301',
+  GRAVE:  '\u0300', CIRC:  '\u0342', IOTA:  '\u0345', DIAER: '\u0308',
+};
+const TG_ROWS = [
+  ['a','α','Α'],['b','β','Β'],['g','γ','Γ'],['d','δ','Δ'],['e','ε','Ε'],
+  ['z','ζ','Ζ'],['h','η','Η'],['q','θ','Θ'],['i','ι','Ι'],['k','κ','Κ'],
+  ['l','λ','Λ'],['m','μ','Μ'],['n','ν','Ν'],['x','ξ','Ξ'],['o','ο','Ο'],
+  ['p','π','Π'],['r','ρ','Ρ'],['s','σ','Σ'],['t','τ','Τ'],['u','υ','Υ'],
+  ['f','φ','Φ'],['c','χ','Χ'],['y','ψ','Ψ'],['w','ω','Ω'],
+];
+const TG_MAP = {};
+for (const [k, lo, hi] of TG_ROWS) { TG_MAP[k] = lo; TG_MAP[k.toUpperCase()] = hi; }
+const TG_VOWELS  = new Set('αεηιουωΑΕΗΙΟΥΩ');
+const TG_IOTA_V  = new Set('αηωΑΗΩ');
+const TG_DIAER_V = new Set('ιυΙΥ');
+
+let tgQ = { breathing: '', accent: '', iota: false, diaeresis: false };
+
+function tgHas()  { return !!(tgQ.breathing || tgQ.accent || tgQ.iota || tgQ.diaeresis); }
+function tgClear(){ tgQ = { breathing:'', accent:'', iota:false, diaeresis:false }; tgBadge(); }
+
+function tgBadge() {
+  const el = document.getElementById('searchPending');
+  if (!el) return;
+  if (!tgHas()) { el.textContent = ''; return; }
+  let s = '';
+  if (tgQ.breathing === 'smooth') s += ')';
+  if (tgQ.breathing === 'rough')  s += '(';
+  if (tgQ.accent === 'acute')     s += '/';
+  if (tgQ.accent === 'grave')     s += '\\';
+  if (tgQ.accent === 'circumflex') s += '=';
+  if (tgQ.iota)     s += '|';
+  if (tgQ.diaeresis) s += '+';
+  el.textContent = s;
+}
+
+function tgCompose(base, q) {
+  let s = base;
+  if (q.diaeresis && TG_DIAER_V.has(base)) { s += TG.DIAER; }
+  else { if (q.breathing === 'smooth') s += TG.SMOOTH; else if (q.breathing === 'rough') s += TG.ROUGH; }
+  if (q.accent === 'acute') s += TG.ACUTE; else if (q.accent === 'grave') s += TG.GRAVE; else if (q.accent === 'circumflex') s += TG.CIRC;
+  if (q.iota && TG_IOTA_V.has(base)) s += TG.IOTA;
+  return s.normalize('NFC');
+}
+
+function tgCharBefore(el) { const p = el.selectionStart; return p > 0 ? el.value[p-1] : ''; }
+
+function tgInsert(el, text) {
+  const s = el.selectionStart, e = el.selectionEnd;
+  el.value = el.value.slice(0,s) + text + el.value.slice(e);
+  el.selectionStart = el.selectionEnd = s + text.length;
+}
+
+function tgReplaceLast(el, ch) {
+  const p = el.selectionStart; if (!p) return;
+  el.value = el.value.slice(0,p-1) + ch + el.value.slice(p);
+  el.selectionStart = el.selectionEnd = p - 1 + ch.length;
+}
+
+function tgModPrev(el, type) {
+  const ch = tgCharBefore(el); if (!ch) return false;
+  const nfd = ch.normalize('NFD'), base = nfd[0];
+  const isV = TG_VOWELS.has(base), isR = base==='ρ'||base==='Ρ';
+  if (type==='smooth'||type==='rough') {
+    if (!isV && !isR) return false;
+    let d = nfd.split(TG.SMOOTH).join('').split(TG.ROUGH).join('');
+    tgReplaceLast(el, (d + (type==='smooth'?TG.SMOOTH:TG.ROUGH)).normalize('NFC')); return true;
+  }
+  if (!isV) return false;
+  let d = nfd;
+  if (type==='acute'||type==='grave'||type==='circumflex') {
+    d = d.split(TG.ACUTE).join('').split(TG.GRAVE).join('').split(TG.CIRC).join('');
+    tgReplaceLast(el, (d + (type==='acute'?TG.ACUTE:type==='grave'?TG.GRAVE:TG.CIRC)).normalize('NFC')); return true;
+  }
+  if (type==='iota')  { if (!TG_IOTA_V.has(base)||d.includes(TG.IOTA)) return false; tgReplaceLast(el,(d+TG.IOTA).normalize('NFC')); return true; }
+  if (type==='diaeresis') { if (!TG_DIAER_V.has(base)||d.includes(TG.DIAER)) return false; d=d.split(TG.SMOOTH).join('').split(TG.ROUGH).join(''); tgReplaceLast(el,(d+TG.DIAER).normalize('NFC')); return true; }
+  return false;
+}
+
 // ── Search ────────────────────────────────────────────────────────────────────
 function normalizeGreek(s) {
   return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
-function searchVocab(query) {
-  const q = query.trim().toLowerCase();
-  if (!q) return [];
-  const qNorm = normalizeGreek(q);
-  const results = [];
-  const vocab = vocabSets[activeSet];
-  for (const [ch, words] of Object.entries(vocab)) {
-    for (const w of words) {
-      if (normalizeGreek(w.greek).includes(qNorm) || w.english.toLowerCase().includes(q)) {
-        results.push({...w, ch: parseInt(ch)});
-      }
-    }
-  }
-  return results.slice(0, 12);
+function searchByEN(q) {
+  const lq = q.trim().toLowerCase(); if (!lq) return [];
+  const out = [];
+  for (const [ch, words] of Object.entries(vocabSets[activeSet]))
+    for (const w of words)
+      if (w.english.toLowerCase().includes(lq)) out.push({...w, ch: parseInt(ch)});
+  return out.slice(0, 12);
 }
 
-const searchInput   = document.getElementById('searchInput');
-const searchResults = document.getElementById('searchResults');
-let   searchHits    = [];
-
-function renderSearchResults(results) {
-  if (!results.length) {
-    searchResults.innerHTML = '<div class="search-no-results">No matches</div>';
-    searchResults.classList.add('open');
-    return;
-  }
-  searchResults.innerHTML = results.map((w, i) => {
-    const inDeck = orderedDeck.some(d => d.greek === w.greek && d.english === w.english);
-    return `<div class="search-result-item${inDeck ? '' : ' not-in-deck'}" data-i="${i}">
-      <span class="sri-greek">${w.greek}</span>
-      <span class="sri-english">${w.english}</span>
-      <span class="sri-ch">Ch ${w.ch}</span>
-    </div>`;
-  }).join('');
-  searchResults.classList.add('open');
+function searchByGR(q) {
+  const qn = normalizeGreek(q.trim()); if (!qn) return [];
+  const out = [];
+  for (const [ch, words] of Object.entries(vocabSets[activeSet]))
+    for (const w of words)
+      if (normalizeGreek(w.greek).includes(qn)) out.push({...w, ch: parseInt(ch)});
+  return out.slice(0, 12);
 }
 
-searchInput.addEventListener('input', () => {
-  const q = searchInput.value;
-  if (!q.trim()) { searchResults.classList.remove('open'); return; }
-  searchHits = searchVocab(q);
-  renderSearchResults(searchHits);
-});
+const searchEN      = document.getElementById('searchEN');
+const searchGR      = document.getElementById('searchGR');
+const resultsEN     = document.getElementById('searchResultsEN');
+const resultsGR     = document.getElementById('searchResultsGR');
+let hitsEN = [], hitsGR = [];
 
-searchResults.addEventListener('mousedown', e => {
-  // mousedown so the blur doesn't fire first and close the dropdown
-  e.preventDefault();
-  const item = e.target.closest('.search-result-item');
-  if (!item) return;
-  const w = searchHits[parseInt(item.dataset.i)];
-  if (!w) return;
+function renderHits(hits, container) {
+  if (!hits.length) {
+    container.innerHTML = '<div class="search-no-results">No matches</div>';
+  } else {
+    container.innerHTML = hits.map((w, i) => {
+      const inDeck = orderedDeck.some(d => d.greek === w.greek && d.english === w.english);
+      return `<div class="search-result-item${inDeck?'':' not-in-deck'}" data-i="${i}">
+        <span class="sri-greek">${w.greek}</span>
+        <span class="sri-english">${w.english}</span>
+        <span class="sri-ch">Ch ${w.ch}</span>
+      </div>`;
+    }).join('');
+  }
+  container.classList.add('open');
+}
 
-  let deckIdx = orderedDeck.findIndex(d => d.greek === w.greek && d.english === w.english);
-  if (deckIdx === -1) {
-    // Auto-select the missing chapter then rebuild
-    const chInput = chapterGrid.querySelector(`input[value="${w.ch}"]`);
-    if (chInput) { chInput.checked = true; chInput.closest('.ch-label').classList.add('checked'); }
+function jumpTo(w, inputEl, container) {
+  let di = orderedDeck.findIndex(d => d.greek===w.greek && d.english===w.english);
+  if (di === -1) {
+    const ci = chapterGrid.querySelector(`input[value="${w.ch}"]`);
+    if (ci) { ci.checked = true; ci.closest('.ch-label').classList.add('checked'); }
     buildDeck();
-    deckIdx = orderedDeck.findIndex(d => d.greek === w.greek && d.english === w.english);
+    di = orderedDeck.findIndex(d => d.greek===w.greek && d.english===w.english);
   }
-
-  if (deckIdx !== -1) {
+  if (di !== -1) {
     if (shuffled) {
       shuffled = false;
       document.getElementById('btnOrdered').classList.add('active');
       document.getElementById('btnShuffled').classList.remove('active');
       deck = [...orderedDeck];
     }
-    idx = deckIdx;
-    card.classList.remove('flipped');
-    flipped = false;
-    render();
+    idx = di; card.classList.remove('flipped'); flipped = false; render();
   }
+  inputEl.value = ''; container.classList.remove('open'); inputEl.blur();
+}
 
-  searchInput.value = '';
-  searchResults.classList.remove('open');
-  searchInput.blur();
+// English search
+searchEN.addEventListener('input', () => {
+  const q = searchEN.value;
+  if (!q.trim()) { resultsEN.classList.remove('open'); return; }
+  hitsEN = searchByEN(q); renderHits(hitsEN, resultsEN);
+});
+resultsEN.addEventListener('mousedown', e => {
+  e.preventDefault();
+  const item = e.target.closest('.search-result-item'); if (!item) return;
+  const w = hitsEN[parseInt(item.dataset.i)]; if (!w) return;
+  jumpTo(w, searchEN, resultsEN);
 });
 
+// Greek search with transliteration
+searchGR.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const key = e.key;
+  if (key.length > 1) { if (key==='Backspace') tgClear(); return; }
+
+  const MOD_MAP = { ')':'smooth', '(':'rough', '/':'acute', '\\':'grave', '=':'circumflex', '|':'iota', '+':'diaeresis' };
+  if (MOD_MAP[key]) {
+    e.preventDefault();
+    const type = MOD_MAP[key];
+    if (!tgModPrev(searchGR, type)) {
+      if (type==='smooth'||type==='rough')     tgQ.breathing = type;
+      else if (type==='acute'||type==='grave'||type==='circumflex') tgQ.accent = type;
+      else if (type==='iota')     tgQ.iota = true;
+      else if (type==='diaeresis') tgQ.diaeresis = true;
+    }
+    tgBadge(); return;
+  }
+
+  const base = TG_MAP[key];
+  if (base !== undefined) {
+    e.preventDefault();
+    const ch = (TG_VOWELS.has(base)||base==='ρ'||base==='Ρ') && tgHas()
+      ? tgCompose(base, tgQ) : base;
+    tgClear(); tgInsert(searchGR, ch);
+    searchGR.dispatchEvent(new Event('input')); return;
+  }
+  tgClear();
+});
+
+searchGR.addEventListener('input', () => {
+  const q = searchGR.value;
+  if (!q.trim()) { resultsGR.classList.remove('open'); return; }
+  hitsGR = searchByGR(q); renderHits(hitsGR, resultsGR);
+});
+resultsGR.addEventListener('mousedown', e => {
+  e.preventDefault();
+  const item = e.target.closest('.search-result-item'); if (!item) return;
+  const w = hitsGR[parseInt(item.dataset.i)]; if (!w) return;
+  tgClear(); jumpTo(w, searchGR, resultsGR);
+});
+
+// Close dropdowns on outside click
 document.addEventListener('click', e => {
   if (!document.getElementById('searchWrap').contains(e.target)) {
-    searchResults.classList.remove('open');
+    resultsEN.classList.remove('open');
+    resultsGR.classList.remove('open');
   }
 });
+
+// ── Key reference grid ────────────────────────────────────────────────────────
+(function() {
+  const grid = document.getElementById('kmGrid');
+  for (const [key, lo, hi] of TG_ROWS) {
+    const cell = document.createElement('div');
+    cell.className = 'km-cell';
+    cell.innerHTML = `<span class="km-key">${key}</span><span class="km-lo">${lo}</span><span class="km-hi">${hi}</span>`;
+    grid.appendChild(cell);
+  }
+})();
 
 // Init
 buildChapterGrid();
