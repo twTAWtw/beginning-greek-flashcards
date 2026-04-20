@@ -1757,9 +1757,10 @@ function render() {
     backMain.textContent  = w.english;
     backSub.textContent   = cognoteText;
   } else {
-    // Front = English (cognate on English/front), Back = Greek
+    // Front = English only (strip Greek-char parentheticals), Back = Greek
+    const engOnly = w.english.replace(/\s*\([^)]*[\u0370-\u03FF\u1F00-\u1FFF][^)]*\)/g, '').trim();
     frontHint.textContent = 'ENGLISH';
-    frontMain.textContent = w.english;
+    frontMain.textContent = engOnly;
     frontSub.textContent  = '';
     backHint.textContent  = 'GREEK';
     backMain.textContent  = w.greek;
