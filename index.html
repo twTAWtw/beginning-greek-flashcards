@@ -331,11 +331,110 @@
   /* Card wrapper needs a fixed height for absolute children */
   .card-area .card { height: 240px; }
   .card-face { height: 240px; min-height: unset; }
+
+  /* Search */
+  .search-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    margin-bottom: 16px;
+  }
+
+  .search-input {
+    width: 100%;
+    background: #16213e;
+    border: 1px solid #2a3a5c;
+    border-radius: 8px;
+    color: #e0e0e0;
+    font-size: 0.92rem;
+    padding: 9px 12px 9px 38px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  .search-input::placeholder { color: #555; }
+  .search-input:focus { border-color: #c9a96e; }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #555;
+    font-size: 0.95rem;
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  .search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #16213e;
+    border: 1px solid #2a3a5c;
+    border-radius: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+
+  .search-results.open { display: block; }
+
+  .search-result-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid #1e2840;
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+  }
+
+  .search-result-item:last-child { border-bottom: none; }
+  .search-result-item:hover { background: #1e2d4a; }
+  .search-result-item.not-in-deck { opacity: 0.55; }
+
+  .sri-greek {
+    color: #f0e6d0;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .sri-english {
+    color: #888;
+    font-size: 0.82rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sri-ch {
+    margin-left: auto;
+    color: #555;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .search-no-results {
+    padding: 12px;
+    color: #555;
+    font-size: 0.85rem;
+    text-align: center;
+  }
 </style>
 </head>
 <body>
 
 <h1>&#x1F4D6; Greek Flashcards</h1>
+
+<div class="search-wrap" id="searchWrap">
+  <span class="search-icon">&#x2315;</span>
+  <input type="search" class="search-input" id="searchInput" placeholder="Search Greek or English…" autocomplete="off" autocorrect="off" spellcheck="false">
+  <div class="search-results" id="searchResults"></div>
+</div>
 
 <div class="controls">
   <div class="control-row">
@@ -1533,6 +1632,96 @@ document.getElementById('btnGDNTG').addEventListener('click', () => {
   document.getElementById('btnBNTG').classList.remove('active');
   buildChapterGrid();
   buildDeck();
+});
+
+// ── Search ────────────────────────────────────────────────────────────────────
+function normalizeGreek(s) {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function searchVocab(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  const qNorm = normalizeGreek(q);
+  const results = [];
+  const vocab = vocabSets[activeSet];
+  for (const [ch, words] of Object.entries(vocab)) {
+    for (const w of words) {
+      if (normalizeGreek(w.greek).includes(qNorm) || w.english.toLowerCase().includes(q)) {
+        results.push({...w, ch: parseInt(ch)});
+      }
+    }
+  }
+  return results.slice(0, 12);
+}
+
+const searchInput   = document.getElementById('searchInput');
+const searchResults = document.getElementById('searchResults');
+let   searchHits    = [];
+
+function renderSearchResults(results) {
+  if (!results.length) {
+    searchResults.innerHTML = '<div class="search-no-results">No matches</div>';
+    searchResults.classList.add('open');
+    return;
+  }
+  searchResults.innerHTML = results.map((w, i) => {
+    const inDeck = orderedDeck.some(d => d.greek === w.greek && d.english === w.english);
+    return `<div class="search-result-item${inDeck ? '' : ' not-in-deck'}" data-i="${i}">
+      <span class="sri-greek">${w.greek}</span>
+      <span class="sri-english">${w.english}</span>
+      <span class="sri-ch">Ch ${w.ch}</span>
+    </div>`;
+  }).join('');
+  searchResults.classList.add('open');
+}
+
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value;
+  if (!q.trim()) { searchResults.classList.remove('open'); return; }
+  searchHits = searchVocab(q);
+  renderSearchResults(searchHits);
+});
+
+searchResults.addEventListener('mousedown', e => {
+  // mousedown so the blur doesn't fire first and close the dropdown
+  e.preventDefault();
+  const item = e.target.closest('.search-result-item');
+  if (!item) return;
+  const w = searchHits[parseInt(item.dataset.i)];
+  if (!w) return;
+
+  let deckIdx = orderedDeck.findIndex(d => d.greek === w.greek && d.english === w.english);
+  if (deckIdx === -1) {
+    // Auto-select the missing chapter then rebuild
+    const chInput = chapterGrid.querySelector(`input[value="${w.ch}"]`);
+    if (chInput) { chInput.checked = true; chInput.closest('.ch-label').classList.add('checked'); }
+    buildDeck();
+    deckIdx = orderedDeck.findIndex(d => d.greek === w.greek && d.english === w.english);
+  }
+
+  if (deckIdx !== -1) {
+    if (shuffled) {
+      shuffled = false;
+      document.getElementById('btnOrdered').classList.add('active');
+      document.getElementById('btnShuffled').classList.remove('active');
+      deck = [...orderedDeck];
+    }
+    idx = deckIdx;
+    card.classList.remove('flipped');
+    flipped = false;
+    render();
+  }
+
+  searchInput.value = '';
+  searchResults.classList.remove('open');
+  searchInput.blur();
+});
+
+document.addEventListener('click', e => {
+  if (!document.getElementById('searchWrap').contains(e.target)) {
+    searchResults.classList.remove('open');
+  }
 });
 
 // Init
