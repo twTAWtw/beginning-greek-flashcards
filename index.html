@@ -275,6 +275,17 @@
     color: #aab;
   }
 
+  .card-ch {
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #778;
+    user-select: none;
+  }
+
   .flip-hint {
     font-size: 0.72rem;
     color: #444;
@@ -695,6 +706,7 @@
       <div class="card-hint" id="backHint">ENGLISH</div>
       <div class="card-main" id="backMain">—</div>
       <div class="card-sub" id="backSub"></div>
+      <div class="card-ch" id="backCh"></div>
     </div>
   </div>
 </div>
@@ -1674,6 +1686,7 @@ const frontSub    = document.getElementById('frontSub');
 const backHint    = document.getElementById('backHint');
 const backMain    = document.getElementById('backMain');
 const backSub     = document.getElementById('backSub');
+const backCh      = document.getElementById('backCh');
 const progressEl  = document.getElementById('progress');
 const progressBar = document.getElementById('progressBar');
 const btnPrev     = document.getElementById('btnPrev');
@@ -1738,6 +1751,7 @@ function render() {
     frontSub.textContent   = '';
     backMain.textContent   = '—';
     backSub.textContent    = '';
+    backCh.textContent     = '';
     progressEl.textContent = '0 / 0';
     progressBar.style.width = '0%';
     btnPrev.disabled = true;
@@ -1766,6 +1780,8 @@ function render() {
     backMain.textContent  = w.greek;
     backSub.textContent   = '';
   }
+
+  backCh.textContent = 'Ch ' + w.ch;
 
   const n = deck.length;
   progressEl.textContent  = `${idx + 1} / ${n}`;
@@ -1936,8 +1952,12 @@ function tgModPrev(el, type) {
 }
 
 // ── Search ────────────────────────────────────────────────────────────────────
-function normalizeGreek(s) {
-  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+function normalizeGreek(s, keepBreathing = false) {
+  const nfd = s.normalize('NFD');
+  if (keepBreathing)
+    // Remove all combining marks except smooth (U+0313) and rough (U+0314) breathing
+    return nfd.replace(/[\u0300-\u0312\u0315-\u036f]/g, '').toLowerCase();
+  return nfd.replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
 function searchByEN(q) {
@@ -1950,11 +1970,15 @@ function searchByEN(q) {
 }
 
 function searchByGR(q) {
-  const qn = normalizeGreek(q.trim()); if (!qn) return [];
+  const qt = q.trim(); if (!qt) return [];
+  const hasBreathing = /[̓̔]/.test(qt.normalize('NFD'));
+  const qn = normalizeGreek(qt, hasBreathing);
   const out = [];
   for (const [ch, words] of Object.entries(vocabSets[activeSet]))
-    for (const w of words)
-      if (normalizeGreek(w.greek).includes(qn)) out.push({...w, ch: parseInt(ch)});
+    for (const w of words) {
+      const lemma = w.greek.split(',')[0].trim();
+      if (normalizeGreek(lemma, hasBreathing).startsWith(qn)) out.push({...w, ch: parseInt(ch)});
+    }
   return out.slice(0, 12);
 }
 
@@ -2018,6 +2042,16 @@ searchGR.addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   const key = e.key;
   if (key.length > 1) { if (key==='Backspace') tgClear(); return; }
+
+  if (key === ' ') {
+    e.preventDefault();
+    const p = searchGR.selectionStart;
+    if (p > 0 && searchGR.value[p - 1] === 'σ') {
+      tgReplaceLast(searchGR, 'ς');
+      searchGR.dispatchEvent(new Event('input'));
+    }
+    tgClear(); return;
+  }
 
   const MOD_MAP = { ')':'smooth', '(':'rough', '/':'acute', '\\':'grave', '=':'circumflex', '|':'iota', '+':'diaeresis' };
   if (MOD_MAP[key]) {
