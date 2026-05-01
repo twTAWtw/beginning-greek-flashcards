@@ -286,6 +286,20 @@
     user-select: none;
   }
 
+  .card-pos {
+    position: absolute;
+    bottom: 12px;
+    left: 16px;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    user-select: none;
+  }
+  .card-pos[data-pos="verb"]      { color: #7aacda; }
+  .card-pos[data-pos="noun"]      { color: #7acc8a; }
+  .card-pos[data-pos="adjective"] { color: #b87ada; }
+  .card-pos[data-pos="other"]     { color: #778; }
+
   .flip-hint {
     font-size: 0.72rem;
     color: #444;
@@ -707,6 +721,7 @@
       <div class="card-main" id="backMain">—</div>
       <div class="card-sub" id="backSub"></div>
       <div class="card-ch" id="backCh"></div>
+      <div class="card-pos" id="backPos"></div>
     </div>
   </div>
 </div>
@@ -1625,6 +1640,16 @@ const RAW_GDNTG = `## Chapter 1
 χόρτος, ὁ              grass, hay (15)
 ὠφελέω                 I help, aid, benefit (15)`;
 
+// ── Part of speech detection ─────────────────────────────────────────────────
+function getPOS(greek, english) {
+  if (english.trimStart().startsWith('I ')) return 'verb';
+  const ARTICLES = new Set(['ο', 'η', 'το']);
+  const forms = greek.split(',').map(f => f.trim().split(/\s+/)[0]);
+  if (forms.some(f => ARTICLES.has(normalizeGreek(f)))) return 'noun';
+  if (forms.length >= 3) return 'adjective';
+  return 'other';
+}
+
 // ── Parse ──────────────────────────────────────────────────────────────────
 function parseVocab(raw) {
   const chapters = {};
@@ -1662,7 +1687,7 @@ function parseVocab(raw) {
       cognate = '';
     }
     if (greek && english) {
-      chapters[current].push({ greek, english, cognate });
+      chapters[current].push({ greek, english, cognate, pos: getPOS(greek, english) });
     }
   }
   return chapters;
@@ -1687,6 +1712,7 @@ const backHint    = document.getElementById('backHint');
 const backMain    = document.getElementById('backMain');
 const backSub     = document.getElementById('backSub');
 const backCh      = document.getElementById('backCh');
+const backPos     = document.getElementById('backPos');
 const progressEl  = document.getElementById('progress');
 const progressBar = document.getElementById('progressBar');
 const btnPrev     = document.getElementById('btnPrev');
@@ -1752,6 +1778,8 @@ function render() {
     backMain.textContent   = '—';
     backSub.textContent    = '';
     backCh.textContent     = '';
+    backPos.textContent    = '';
+    backPos.removeAttribute('data-pos');
     progressEl.textContent = '0 / 0';
     progressBar.style.width = '0%';
     btnPrev.disabled = true;
@@ -1781,7 +1809,9 @@ function render() {
     backSub.textContent   = '';
   }
 
-  backCh.textContent = 'Ch ' + w.ch;
+  backCh.textContent    = 'Ch ' + w.ch;
+  backPos.textContent   = w.pos || '';
+  backPos.dataset.pos   = w.pos || '';
 
   const n = deck.length;
   progressEl.textContent  = `${idx + 1} / ${n}`;
@@ -1973,11 +2003,13 @@ function searchByGR(q) {
   const qt = q.trim(); if (!qt) return [];
   const hasBreathing = /[̓̔]/.test(qt.normalize('NFD'));
   const qn = normalizeGreek(qt, hasBreathing);
+  const ARTICLES = new Set(['ο', 'η', 'το']);
   const out = [];
   for (const [ch, words] of Object.entries(vocabSets[activeSet]))
     for (const w of words) {
-      const lemma = w.greek.split(',')[0].trim();
-      if (normalizeGreek(lemma, hasBreathing).startsWith(qn)) out.push({...w, ch: parseInt(ch)});
+      const forms = w.greek.split(',').map(f => f.trim().split(/\s+/)[0])
+        .filter(f => !ARTICLES.has(normalizeGreek(f)));
+      if (forms.some(f => normalizeGreek(f, hasBreathing).startsWith(qn))) out.push({...w, ch: parseInt(ch)});
     }
   return out.slice(0, 12);
 }
